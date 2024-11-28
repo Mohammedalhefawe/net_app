@@ -1,19 +1,22 @@
 import 'package:data_table_2/data_table_2.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get_utils/get_utils.dart';
 import 'package:web1/constants/icons_svg.dart';
+import 'package:web1/features/home/view/screens/files_screen.dart';
 import 'package:web1/features/home/view/widgets/search_text_filed.dart';
+import 'package:file_picker/file_picker.dart';
 
-class FilePage extends StatefulWidget {
-  const FilePage({super.key});
+class FilesGroupPage extends StatefulWidget {
+  const FilesGroupPage({super.key});
 
   @override
-  State<FilePage> createState() => _FilePageState();
+  State<FilesGroupPage> createState() => _FilePageState();
 }
 
-class _FilePageState extends State<FilePage> {
+class _FilePageState extends State<FilesGroupPage> {
+  final List<String> groupMembers = ["Alice", "Bob", "Charlie", "Diana"];
+
   PlatformFile? selectedFile;
 
   Future<void> pickAndUploadFile() async {
@@ -41,6 +44,52 @@ class _FilePageState extends State<FilePage> {
     }
   }
 
+  // Function to show all members
+  void _showAllMembersDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("All Group Members"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: groupMembers
+                .map((member) => ListTile(
+                      leading: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.blue[200],
+                        child: Text(
+                          member[0],
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      title: Text(member),
+                    ))
+                .toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Close"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Function to handle inviting a new member
+  void _inviteNewMember(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Invite new member action triggered!")),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -60,18 +109,84 @@ class _FilePageState extends State<FilePage> {
             const SizedBox(height: 20),
             // Recently Groups Used
             AddFileWidget(
-              addFileFunction: () async {
-                await pickAndUploadFile();
+              addFileFunction: () {
+                pickAndUploadFile();
               },
             ),
             const SizedBox(height: 20),
             // Recently Files Used
-            Text(
-              'my_upload_files'.tr,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'my_upload_files'.tr,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Row(
+                  children: [
+                    ...groupMembers.take(3).map((member) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 0.0),
+                        child: CircleAvatar(
+                          radius: 15,
+                          backgroundColor: Colors.blue[200],
+                          child: Text(
+                            member[0], // First character of the name
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+
+                    // See all members circle
+                    GestureDetector(
+                      onTap: () {
+                        _showAllMembersDialog(context);
+                      },
+                      child: CircleAvatar(
+                        radius: 15,
+                        backgroundColor: Colors.grey[300],
+                        child: const Icon(
+                          Icons.group,
+                          size: 10,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 8),
+
+                    // Invite new members button
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        // Handle invite new member action
+                        _inviteNewMember(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                          shadowColor:
+                              Theme.of(context).cardColor.withAlpha(35),
+                          elevation: 0,
+                          backgroundColor:
+                              Theme.of(context).cardColor.withAlpha(30),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          )),
+                      icon: const Icon(
+                        Icons.share,
+                        size: 10,
+                      ),
+                      label: const Text("Shared Group"),
+                    ),
+                  ],
+                ),
+              ],
             ),
             FilesTable(
               data: [
@@ -154,16 +269,11 @@ class _FilesTableState extends State<FilesTable> {
                   ? Text('action'.tr)
                   : Align(
                       alignment: Alignment.center,
-                      child: InkWell(
-                        onTap: () {
-                          showActionDialog(context);
-                        },
-                        child: SvgPicture.string(
-                          listIcon,
-                          width: 20,
-                          height: 20,
-                          color: Theme.of(context).iconTheme.color,
-                        ),
+                      child: SvgPicture.string(
+                        listIcon,
+                        width: 20,
+                        height: 20,
+                        color: Theme.of(context).iconTheme.color,
                       ),
                     ),
               size: ColumnSize.S,
@@ -177,7 +287,7 @@ class _FilesTableState extends State<FilesTable> {
                         onChanged: (value) {
                           setState(() {
                             selectedCount += value! ? 1 : -1;
-                            selectedRows[index] = value ?? false;
+                            selectedRows[index] = value;
                           });
                         })),
                     DataCell(
@@ -201,53 +311,15 @@ class _FilesTableState extends State<FilesTable> {
                           ? const Text('')
                           : Align(
                               alignment: Alignment.center,
-                              child: InkWell(
-                                onTap: () {
-                                  showActionDialog(context);
-                                },
-                                child: SvgPicture.string(
-                                  listIcon,
-                                  width: 20,
-                                  height: 20,
-                                  color: Theme.of(context).iconTheme.color,
-                                ),
+                              child: SvgPicture.string(
+                                listIcon,
+                                width: 20,
+                                height: 20,
+                                color: Theme.of(context).iconTheme.color,
                               ),
                             ),
                     ),
                   ]))),
-    );
-  }
-}
-
-class AddFileWidget extends StatelessWidget {
-  final void Function()? addFileFunction;
-  const AddFileWidget({
-    super.key,
-    this.addFileFunction,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: addFileFunction,
-      child: Container(
-        width: double.infinity,
-        height: 100,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            gradient: LinearGradient(colors: [
-              Theme.of(context).cardColor.withOpacity(0.1),
-              Theme.of(context).cardColor.withOpacity(0.13),
-            ])),
-        child: Center(
-            child: Text(
-          'add_file'.tr,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        )),
-      ),
     );
   }
 }
@@ -271,65 +343,3 @@ class TableDataModle {
 
 Map<int, bool> selectedRows = {};
 int selectedCount = 0;
-
-void showActionDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text("Select Action"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.share, color: Colors.blue),
-              title: const Text('Share'),
-              onTap: () {
-                Navigator.pop(context);
-                _performAction(context, "Share");
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.check, color: Colors.green),
-              title: const Text('Check-In'),
-              onTap: () {
-                Navigator.pop(context);
-                _performAction(context, "Check-In");
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('Delete'),
-              onTap: () {
-                Navigator.pop(context);
-                _performAction(context, "Delete");
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit, color: Colors.orange),
-              title: const Text('Rename'),
-              onTap: () {
-                Navigator.pop(context);
-                _performAction(context, "Rename");
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-            },
-            child: const Text("Cancel"),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-void _performAction(BuildContext context, String action) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('$action selected')),
-  );
-}

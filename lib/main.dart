@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:web1/constants/app_routes.dart';
 import 'package:web1/features/auth/controller/app_controller.dart';
 import 'package:web1/features/auth/controller/auth_controller.dart';
 import 'package:web1/features/auth/view/login_view.dart';
@@ -19,12 +18,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      
       debugShowCheckedModeBanner: false,
       theme: Get.find<AppController>().lightTheme,
       darkTheme: Get.find<AppController>().darkTheme,
       themeMode: Get.find<AppController>().themeMode.value,
       locale: Get.find<AppController>().currentLocale.value,
       translations: AppTranslations(),
+      
       home: LoginView(),
       // initialRoute: AppRoutes.signUp,
       // getPages: AppRoutes.routes,

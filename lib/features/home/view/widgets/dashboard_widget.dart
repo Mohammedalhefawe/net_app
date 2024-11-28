@@ -2,143 +2,231 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:web1/constants/icons_svg.dart';
-
-import '../screens/files_screen.dart';
-import '../screens/groups_screen.dart';
-import '../screens/home_screen.dart';
-import '../screens/settings_screen.dart';
+import 'package:web1/features/home/controller/dashboard_controller.dart';
 import 'add_file_button_widget.dart';
 import 'info_section_widget.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
-  _Dashboardscreenstate createState() => _Dashboardscreenstate();
-}
-
-class _Dashboardscreenstate extends State<DashboardScreen> {
-  List<Widget> screens = [
-    const HomePage(),
-    const FilePage(),
-    const GroupsPage(),
-    const SettingsPage(),
-  ];
-  int _hoveredIndex = 0; // Track hovered row
-  int _selectedScreenIndex = 0; // Track selected row
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          // Left Section
-          Container(
-            width: 250,
-            color: Colors.blueGrey[900],
-            child: ListView(
-              children: [
-                // Logo and Name
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      SvgPicture.string(
-                        logoIcon,
-                        width: 28,
-                        height: 28,
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        "file_management".tr,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+    // DashboardController controller = Get.find<DashboardController>();
+    DashboardController controller = Get.put(DashboardController());
+    return LayoutBuilder(builder: (context, constraints) {
+      return Scaffold(
+        appBar: constraints.maxWidth > 600
+            ? null
+            : AppBar(
+                leading: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SvgPicture.string(
+                    logoIcon,
+                    width: 16,
+                    height: 16,
                   ),
                 ),
-
-                // Add File Button
-                AnimatedButtonDemo(
-                  onPressed: () {},
+                title: Text(
+                  "file_management".tr,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-
-                const SizedBox(
-                  height: 30,
-                ),
-                // Navigation Rows
-                _buildNavItem(homeIcon, "home".tr, 0),
-                _buildNavItem(fileIcon, "files".tr, 1),
-                _buildNavItem(groupIcon, "groups".tr, 2),
-                _buildNavItem(settingIcon, "settings".tr, 3),
-              ],
-            ),
-          ),
-
-          // Right Section
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              height: MediaQuery.sizeOf(context).height,
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: Row(
+                actions: [
+                  InkWell(
+                    onTap: () {
+                      showScreenSelectorDialog(context);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SvgPicture.string(
+                        listIcon,
+                        color: Colors.white,
+                        width: 16,
+                        height: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+        body: GetBuilder<DashboardController>(
+          init: controller,
+          builder: (cotroller) {
+            return Builder(builder: (context) {
+              return Row(
                 children: [
-                  screens[_selectedScreenIndex],
-                  VerticalDivider(
-                      width: 1,
-                      color: Get.isDarkMode ? Colors.white24 : Colors.grey),
-                  // Second Column
-                  const InfoSectionWidget(),
+                  // Left Section
+                  if (constraints.maxWidth > 600)
+                    Container(
+                      width: constraints.maxWidth > 1000
+                          ? constraints.maxWidth / 5
+                          : 230,
+                      color: Colors.blueGrey[900],
+                      child: ListView(
+                        children: [
+                          // Logo and Name
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                SvgPicture.string(
+                                  logoIcon,
+                                  width: 28,
+                                  height: 28,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "file_management".tr,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Add File Button
+                          AnimatedButtonDemo(
+                            onPressed: () {},
+                          ),
+
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          // Navigation Rows
+                          buildNavItem(homeIcon, "home".tr, 0, false),
+                          buildNavItem(fileIcon, "files".tr, 1, false),
+                          buildNavItem(groupIcon, "groups".tr, 2, false),
+                          buildNavItem(settingIcon, "settings".tr, 3, false),
+                          constraints.maxWidth <= 1200
+                              ? buildNavItem(
+                                  settingIcon, "storage info".tr, 4, false)
+                              : const SizedBox()
+                        ],
+                      ),
+                    ),
+
+                  // Right Section
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: MediaQuery.sizeOf(context).height * 2,
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      child: constraints.maxWidth > 1200
+                          ? Row(
+                              children: [
+                                controller
+                                    .screens[controller.selectedScreenIndex],
+                                VerticalDivider(
+                                    width: 1,
+                                    color: Get.isDarkMode
+                                        ? Colors.white24
+                                        : Colors.grey),
+                                // Second Column
+                                const InfoSectionWidget(),
+                              ],
+                            )
+                          : controller.screens[controller.selectedScreenIndex],
+                    ),
+                  ),
+                ],
+              );
+            });
+          },
+        ),
+      );
+    });
+  }
+}
+
+Widget buildNavItem(String icon, String title, int index, bool isPop) {
+  DashboardController controller = Get.find<DashboardController>();
+
+  final bool isSelected = controller.selectedScreenIndex == index;
+  final bool isHovered = controller.hoveredIndex == index;
+
+  return MouseRegion(
+    onEnter: (_) {
+      controller.hoveredIndex = index;
+      controller.updateUI();
+    },
+    onExit: (_) {
+      controller.hoveredIndex = -1;
+      controller.updateUI();
+    },
+    child: GestureDetector(
+      onTap: () {
+        controller.selectedScreenIndex = index;
+        controller.updateUI();
+        controller.screens = List.from(controller.pages);
+        if (isPop) {
+          Get.back();
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300), // Animation duration
+        color: isSelected
+            ? Colors.blueGrey[700]
+            : isHovered
+                ? Colors.blueGrey[800]
+                : Colors.blueGrey[900],
+        child: ListTile(
+          leading: SvgPicture.string(
+            icon,
+            width: 20,
+            height: 20,
+            color: Colors.white,
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+void showScreenSelectorDialog(BuildContext context) {
+  // Determine alignment based on language
+  final alignment =
+      Get.locale!.languageCode == 'en' ? Alignment.topRight : Alignment.topLeft;
+
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return Align(
+        alignment: alignment,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 50, left: 16, right: 16),
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: 200,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  buildNavItem(homeIcon, "home".tr, 0, true),
+                  buildNavItem(fileIcon, "files".tr, 1, true),
+                  buildNavItem(groupIcon, "groups".tr, 2, true),
+                  buildNavItem(settingIcon, "settings".tr, 3, true),
+                  buildNavItem(settingIcon, "storage info".tr, 4, true)
                 ],
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(String icon, String title, int index) {
-    final bool isSelected = _selectedScreenIndex == index;
-    final bool isHovered = _hoveredIndex == index;
-
-    return MouseRegion(
-      onEnter: (_) => setState(() {
-        _hoveredIndex = index;
-      }),
-      onExit: (_) => setState(() {
-        _hoveredIndex = -1;
-      }),
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedScreenIndex = index;
-          });
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300), // Animation duration
-          color: isSelected
-              ? Colors.blueGrey[700]
-              : isHovered
-                  ? Colors.blueGrey[800]
-                  : Colors.blueGrey[900],
-          child: ListTile(
-            leading: SvgPicture.string(
-              icon,
-              width: 20,
-              height: 20,
-              color: Colors.white,
-            ),
-            title: Text(
-              title,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-          ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
 }

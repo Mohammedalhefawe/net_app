@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:web1/features/home/view/widgets/dashboard_widget.dart';
 import '../controller/auth_controller.dart';
 import '../controller/app_controller.dart';
-import '../model/user_model.dart';
 
 class LoginView extends StatelessWidget {
   final AuthController authController = Get.find();
