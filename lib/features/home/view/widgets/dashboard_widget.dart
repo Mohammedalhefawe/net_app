@@ -11,7 +11,6 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // DashboardController controller = Get.find<DashboardController>();
     DashboardController controller = Get.put(DashboardController());
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
@@ -57,7 +56,6 @@ class DashboardScreen extends StatelessWidget {
             return Builder(builder: (context) {
               return Row(
                 children: [
-                  // Left Section
                   if (constraints.maxWidth > 600)
                     Container(
                       width: constraints.maxWidth > 1000
@@ -66,7 +64,6 @@ class DashboardScreen extends StatelessWidget {
                       color: Colors.blueGrey[900],
                       child: ListView(
                         children: [
-                          // Logo and Name
                           Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Row(
@@ -88,8 +85,6 @@ class DashboardScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-
-                          // Add File Button
                           AnimatedButtonDemo(
                             onPressed: () {},
                           ),
@@ -97,7 +92,6 @@ class DashboardScreen extends StatelessWidget {
                           const SizedBox(
                             height: 30,
                           ),
-                          // Navigation Rows
                           buildNavItem(homeIcon, "home".tr, 0, false),
                           buildNavItem(fileIcon, "files".tr, 1, false),
                           buildNavItem(groupIcon, "groups".tr, 2, false),
@@ -109,8 +103,6 @@ class DashboardScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-
-                  // Right Section
                   Expanded(
                     child: Container(
                       width: double.infinity,
@@ -126,7 +118,6 @@ class DashboardScreen extends StatelessWidget {
                                     color: Get.isDarkMode
                                         ? Colors.white24
                                         : Colors.grey),
-                                // Second Column
                                 const InfoSectionWidget(),
                               ],
                             )
@@ -168,7 +159,7 @@ Widget buildNavItem(String icon, String title, int index, bool isPop) {
         }
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300), // Animation duration
+        duration: const Duration(milliseconds: 300), 
         color: isSelected
             ? Colors.blueGrey[700]
             : isHovered
@@ -192,7 +183,6 @@ Widget buildNavItem(String icon, String title, int index, bool isPop) {
 }
 
 void showScreenSelectorDialog(BuildContext context) {
-  // Determine alignment based on language
   final alignment =
       Get.locale!.languageCode == 'en' ? Alignment.topRight : Alignment.topLeft;
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:web1/features/auth/view/sign_up_view.dart';
 import 'package:web1/features/home/view/widgets/dashboard_widget.dart';
 import '../controller/auth_controller.dart';
 import '../controller/app_controller.dart';
+import '../model/user_model.dart';
 
 class LoginView extends StatelessWidget {
   final AuthController authController = Get.find();
@@ -16,7 +18,6 @@ class LoginView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
     final isMobile = MediaQuery.of(context).size.width < 600;
     final double maxWidth = isMobile ? double.infinity : 400.0;
 
@@ -95,22 +96,41 @@ class LoginView extends StatelessWidget {
                   return authController.isLoading.value
                       ? const Center(child: CircularProgressIndicator())
                       : ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const DashboardScreen()));
-                            // if (formKey.currentState!.validate()) {
-                            //   authController.signIn(UserModel(
-                            //     email: emailController.text,
-                            //     password: passwordController.text,
-                            //   ));
-                            // }
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              final token = await authController.signIn(
+                                UserModel(
+                                  email: emailController.text,
+                                  password: passwordController.text,
+                                ),
+                              );
+                              if (token != null) {
+                                Get.snackbar(
+                                  'success'.tr,
+                                  'login_success'.tr,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.green,
+                                  colorText: Colors.white,
+                                );
+                                Get.to(() => const DashboardScreen());
+                              }
+                            }
                           },
                           child: Text('login'.tr),
                         );
                 }),
+                const SizedBox(height: 16.0),
+                Center(
+                  child: TextButton(
+                    onPressed: () => Get.to(() => SignUpView()),
+                    child: Text(
+                      'do not have an account? signup now'.tr,
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

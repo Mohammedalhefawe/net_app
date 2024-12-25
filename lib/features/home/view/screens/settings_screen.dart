@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:web1/constants/icons_svg.dart';
 import 'package:web1/features/auth/controller/app_controller.dart';
+import 'package:web1/features/auth/controller/auth_controller.dart';
 import 'package:web1/features/home/view/widgets/search_text_filed.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -10,19 +11,19 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AuthController authController = Get.find<AuthController>(); 
+
     return Expanded(
       flex: 3,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
-          children: [
-            // Search TextField
+          children: [            
             SearchTextField(
                 controller: TextEditingController(),
                 fileHandler: () {},
                 groupHandler: () {}),
-            const SizedBox(height: 20),
-            // Recently Files Used
+            const SizedBox(height: 20),    
             Text(
               'settings'.tr,
               style: const TextStyle(
@@ -45,13 +46,12 @@ class SettingsPage extends StatelessWidget {
                     title: settings[index].tilte.tr,
                     icon: settings[index].icon,
                     onTap: () {
-                      if (settings[index].tilte.tr == 'language'.tr) {
+                      if (settings[index].tilte.tr == 'logout'.tr) {
+                        authController.logOut();
+                      } else if (settings[index].tilte.tr == 'language'.tr) {
                         showLanguageDialog(context);
-
-                        print('Language selected');
                       } else if (settings[index].tilte.tr == 'theme'.tr) {
                         showThemeDialog(context);
-                        print('Theme selected');
                       }
                     },
                   );
@@ -146,7 +146,7 @@ void showLanguageDialog(BuildContext context) {
               ),
               title: Text('english'.tr),
               onTap: () {
-                Navigator.pop(context); // Close dialog
+                Navigator.pop(context);
                 AppController().changeLocale(
                   const Locale('en', 'US'),
                 );
@@ -162,7 +162,7 @@ void showLanguageDialog(BuildContext context) {
               ),
               title: Text('arabic'.tr),
               onTap: () {
-                Navigator.pop(context); // Close dialog
+                Navigator.pop(context);
                 AppController().changeLocale(const Locale('ar', 'AE'));
               },
             ),
@@ -171,7 +171,7 @@ void showLanguageDialog(BuildContext context) {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(context);
             },
             child: Text('cancel'.tr),
           ),
@@ -199,7 +199,7 @@ void showThemeDialog(BuildContext context) {
               ),
               title: Text('dark'.tr),
               onTap: () {
-                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); 
                 if (!Get.isDarkMode) {
                   Get.changeThemeMode(ThemeMode.dark);
                 }
@@ -214,7 +214,7 @@ void showThemeDialog(BuildContext context) {
               ),
               title: Text('light'.tr),
               onTap: () {
-                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); 
                 if (Get.isDarkMode) {
                   Get.changeThemeMode(ThemeMode.light);
                 }
@@ -225,7 +225,7 @@ void showThemeDialog(BuildContext context) {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); 
             },
             child: Text('cancel'.tr),
           ),

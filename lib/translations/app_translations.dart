@@ -53,6 +53,7 @@ class AppTranslations extends Translations {
       'status': 'Status',
       'select': 'Select',
       'action': 'Action',
+      'do not have an account? signup now' : 'Do Not Have An Account? Signup Now',
     },
     'ar': {
       'action': 'العمل',
@@ -106,6 +107,7 @@ class AppTranslations extends Translations {
       'light': 'فاتح',
       'english': 'الانجليزية',
       'arabic': 'العربية',
+      'do not have an account? signup now' : 'ليس لديك حساب؟ سجل انشئ حساب الان',
     },
   };
 

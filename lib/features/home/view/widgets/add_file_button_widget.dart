@@ -8,20 +8,19 @@ class AnimatedButtonDemo extends StatefulWidget {
   const AnimatedButtonDemo({super.key, this.onPressed});
 
   @override
-  // ignore: library_private_types_in_public_api
   _AnimatedButtonDemoState createState() => _AnimatedButtonDemoState();
 }
 
 class _AnimatedButtonDemoState extends State<AnimatedButtonDemo> {
-  bool _isHovered = false; // Track hover state
+  bool _isHovered = false; 
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: MouseRegion(
-        onEnter: (_) => setState(() => _isHovered = true), // Hover in
-        onExit: (_) => setState(() => _isHovered = false), // Hover out
+        onEnter: (_) => setState(() => _isHovered = true), 
+        onExit: (_) => setState(() => _isHovered = false), 
         child: ElevatedButton(
           onPressed: widget.onPressed,
           style: ElevatedButton.styleFrom(
@@ -35,8 +34,8 @@ class _AnimatedButtonDemoState extends State<AnimatedButtonDemo> {
             backgroundColor: _isHovered
                 ? Theme.of(context).primaryColor
                 : Colors.transparent,
-            shadowColor: Colors.transparent, // Disable button shadow
-            elevation: 0, // Flat button
+            shadowColor: Colors.transparent, 
+            elevation: 0, 
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -46,7 +45,7 @@ class _AnimatedButtonDemoState extends State<AnimatedButtonDemo> {
                 style: TextStyle(
                   color: _isHovered
                       ? Colors.white
-                      : Colors.white60, // Change text color
+                      : Colors.white60,
                   fontSize: 17,
                 ),
               ),
@@ -55,7 +54,7 @@ class _AnimatedButtonDemoState extends State<AnimatedButtonDemo> {
                 decoration: BoxDecoration(
                   color: _isHovered
                       ? Colors.white30
-                      : Colors.white12, // Remove background on hover
+                      : Colors.white12, 
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: SvgPicture.string(
@@ -64,7 +63,7 @@ class _AnimatedButtonDemoState extends State<AnimatedButtonDemo> {
                   height: 18,
                   color: _isHovered
                       ? Colors.white
-                      : Colors.white60, // Change text color
+                      : Colors.white60,
                 ),
               ),
             ],

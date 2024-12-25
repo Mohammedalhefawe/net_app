@@ -33,7 +33,7 @@ class SearchTextField extends StatelessWidget {
           onTap: () {
             showFilterDialog(context,
                 fileHandler: fileHandler,
-                groupHandler: groupHandler); // Call filter handler
+                groupHandler: groupHandler); 
           },
           child: Padding(
             padding: const EdgeInsets.all(10),
@@ -46,26 +46,26 @@ class SearchTextField extends StatelessWidget {
             ),
           ),
         ),
-        filled: true, // Enables background color
+        filled: true, 
         fillColor: Theme.of(context)
             .cardColor
-            .withAlpha(30), // Sets the background color to a light gray
+            .withAlpha(30), 
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8), // Adds rounded corners
-          borderSide: BorderSide.none, // Removes the default border
+          borderRadius: BorderRadius.circular(8), 
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8), // Adds rounded corners
-          borderSide: BorderSide.none, // Removes the default border
+          borderRadius: BorderRadius.circular(8), 
+          borderSide: BorderSide.none, 
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8), // Adds rounded corners
-          borderSide: BorderSide.none, // Removes the default border
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(
           vertical: 10,
           horizontal: 16,
-        ), // Adjusts padding
+        ), 
       ),
     );
   }
@@ -90,7 +90,7 @@ void showFilterDialog(BuildContext context,
               ),
               title: const Text('By Group'),
               onTap: () {
-                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); 
                 groupHandler();
                 print('Filter by Group selected');
               },
@@ -104,7 +104,7 @@ void showFilterDialog(BuildContext context,
               ),
               title: const Text('By File'),
               onTap: () {
-                Navigator.pop(context); // Close dialog
+                Navigator.pop(context);
                 fileHandler();
                 print('Filter by File selected');
               },
@@ -114,7 +114,7 @@ void showFilterDialog(BuildContext context,
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); 
             },
             child: const Text('Cancel'),
           ),

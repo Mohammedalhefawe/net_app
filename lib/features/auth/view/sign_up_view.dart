@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:web1/features/home/view/widgets/dashboard_widget.dart';
 import '../controller/auth_controller.dart';
 import '../controller/app_controller.dart';
-import 'login_view.dart';
 import '../model/user_model.dart';
+import 'login_view.dart';
 
 class SignUpView extends StatelessWidget {
   final AuthController authController = Get.find();
@@ -13,6 +14,7 @@ class SignUpView extends StatelessWidget {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController(); 
 
   SignUpView({super.key});
 
@@ -88,6 +90,20 @@ class SignUpView extends StatelessWidget {
                 ),
                 const SizedBox(height: 16.0),
                 TextFormField(
+                  controller: phoneController, 
+                  decoration: InputDecoration(
+                    labelText: 'phone_number'.tr,
+                  ),
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'phone_required'.tr; 
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16.0),
+                TextFormField(
                   controller: passwordController,
                   decoration: InputDecoration(
                     labelText: 'password'.tr,
@@ -105,14 +121,17 @@ class SignUpView extends StatelessWidget {
                 ),
                 const SizedBox(height: 24.0),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      UserModel user = UserModel(
-                        name: nameController.text,
-                        email: emailController.text,
-                        password: passwordController.text,
+                      final token = await authController.signUp(
+                        UserModel(
+                          name: nameController.text,
+                          email: emailController.text,
+                          password: passwordController.text,
+                          number: phoneController.text,
+                        ),
                       );
-                      authController.signUp(user).then((_) {
+                      if (token != null) {
                         Get.snackbar(
                           'success'.tr,
                           'sign_up_success'.tr,
@@ -120,15 +139,8 @@ class SignUpView extends StatelessWidget {
                           backgroundColor: Colors.green,
                           colorText: Colors.white,
                         );
-                      }).catchError((error) {
-                        Get.snackbar(
-                          'error'.tr,
-                          '$error',
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: Colors.red,
-                          colorText: Colors.white,
-                        );
-                      });
+                        Get.to(() => const DashboardScreen());
+                      }
                     }
                   },
                   child: Text('sign_up'.tr),

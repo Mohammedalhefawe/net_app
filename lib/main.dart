@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web1/features/auth/controller/app_controller.dart';
 import 'package:web1/features/auth/controller/auth_controller.dart';
-import 'package:web1/features/auth/view/login_view.dart';
+import 'package:web1/features/auth/view/splash_screen.dart';
 import 'package:web1/translations/app_translations.dart';
 import 'package:web1/bindings/app_bindings.dart';
 
@@ -26,9 +26,10 @@ class MyApp extends StatelessWidget {
       locale: Get.find<AppController>().currentLocale.value,
       translations: AppTranslations(),
       
-      home: LoginView(),
-      // initialRoute: AppRoutes.signUp,
-      // getPages: AppRoutes.routes,
+      //home: LoginView(),
+      home: const SplashScreen(),
+      //initialRoute: AppRoutes.SplashScreen,
+      //getPages: AppRoutes.routes,
       initialBinding: AppBindings(),
     );
   }

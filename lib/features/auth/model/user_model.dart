@@ -1,15 +1,19 @@
 class UserModel {
-  String email;
-  String password;
+  String? email;
+  String? password;
   String? name;  
+  String? number;
+  int? id;    
 
-  UserModel({required this.email, required this.password, this.name});
+  UserModel({ this.email,  this.password, this.name, this.number, this.id});
 
   Map<String, dynamic> toJson() {
     return {
-      'email': email,
-      'password': password,
-      if (name != null) 'name': name, 
+      if (email != null) 'email': email,
+      if (password != null) 'password': password,
+      if (name != null) 'name': name,
+      if (number != null) 'number': number,
+      if (id != null) 'id': id,
     };
   }
 
@@ -18,6 +22,8 @@ class UserModel {
       email: json['email'],
       password: json['password'],
       name: json['name'], 
+      number: json['number'], 
+      id: json['id'],
     );
   }
 }

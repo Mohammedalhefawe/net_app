@@ -1,93 +1,141 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get_utils/get_utils.dart';
+import 'package:get/get.dart';
 import 'package:web1/constants/icons_svg.dart';
+import 'package:web1/features/auth/controller/auth_controller.dart';
+import 'package:web1/features/auth/model/user_model.dart';
+import 'package:web1/features/home/controller/file_controller.dart';
+import 'package:web1/features/home/controller/group_controller.dart';
 import 'package:web1/features/home/view/screens/files_screen.dart';
 import 'package:web1/features/home/view/widgets/search_text_filed.dart';
 import 'package:file_picker/file_picker.dart';
 
 class FilesGroupPage extends StatefulWidget {
-  const FilesGroupPage({super.key});
+  final String groupId; 
+
+  const FilesGroupPage({super.key, required this.groupId});
 
   @override
   State<FilesGroupPage> createState() => _FilePageState();
 }
 
 class _FilePageState extends State<FilesGroupPage> {
+  late String groupId;
+  final FileController _fileController = Get.put(FileController());
+
+  @override
+  void initState() {
+    super.initState();
+    groupId = widget.groupId;
+    print("Loaded files for Group ID: $groupId");
+  }
+
   final List<String> groupMembers = ["Alice", "Bob", "Charlie", "Diana"];
 
   PlatformFile? selectedFile;
 
-  Future<void> pickAndUploadFile() async {
+  void _showUsersDialog(BuildContext context) async {
+    final AuthController authController = Get.find<AuthController>();
+    bool isAdmin = false; 
+
     try {
-      // Step 1: Pick a file
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        allowedExtensions: ['pdf', 'doc', 'docx'],
-        type: FileType.custom,
-        allowMultiple: false, // Set to false for single file selection
-        withData: true, // Ensures the bytes are loaded into memory (web)
+      final List<UserModel> users = await authController.getAllUsers();
+
+      showDialog(
+        context: context,
+        builder: (context) {
+          UserModel? selectedUser;
+
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: const Text("Select a User"),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: users.length,
+                          itemBuilder: (context, index) {
+                            final user = users[index];
+                            return ListTile(
+                              title: Text(user.name ?? 'Unknown'),
+                              subtitle: Text(user.id.toString()),
+                              onTap: () {
+                                setState(() {
+                                  selectedUser = user;
+                                });
+                              },
+                              selected: selectedUser == user,
+                              selectedTileColor: Colors.blue.withOpacity(0.1),
+                            );
+                          },
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: isAdmin,
+                            onChanged: (value) {
+                              setState(() {
+                                isAdmin = value ?? false;
+                              });
+                            },
+                          ),
+                          const Text("Make Admin"),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Cancel"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (selectedUser != null) {
+                        final GroupController groupController =
+                            Get.find<GroupController>();
+                        await groupController.addUserToGroup(
+                          userId: selectedUser!.id!,
+                          groupId: int.parse(widget.groupId),
+                          isAdmin: isAdmin,
+                        );
+                        Navigator.pop(context);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Please select a user")),
+                        );
+                      }
+                    },
+                    child: const Text("Add"),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       );
-
-      if (result != null) {
-        setState(() {
-          selectedFile = result.files.first; // Get the first selected file
-        });
-
-        // Step 2: Upload the file to server
-        // await uploadFile(selectedFile!);
-      } else {
-        // User canceled the picker
-      }
     } catch (e) {
-      print("Error picking file: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to load users: $e")),
+      );
     }
   }
 
-  // Function to show all members
-  void _showAllMembersDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("All Group Members"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: groupMembers
-                .map((member) => ListTile(
-                      leading: CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Colors.blue[200],
-                        child: Text(
-                          member[0],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      title: Text(member),
-                    ))
-                .toList(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("Close"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Function to handle inviting a new member
-  void _inviteNewMember(BuildContext context) {
+  void _handleUserSelection(UserModel selectedUser) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Invite new member action triggered!")),
+      SnackBar(content: Text("Selected User: ${selectedUser.name}")),
     );
+
   }
 
   @override
@@ -98,23 +146,19 @@ class _FilePageState extends State<FilesGroupPage> {
         padding: const EdgeInsets.all(16.0),
         height: MediaQuery.sizeOf(context).height,
         child: ListView(
-          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search TextField
             SearchTextField(
                 controller: TextEditingController(),
                 fileHandler: () {},
                 groupHandler: () {}),
 
             const SizedBox(height: 20),
-            // Recently Groups Used
             AddFileWidget(
               addFileFunction: () {
-                pickAndUploadFile();
+                _fileController.pickAndUploadFile(groupId, true);
               },
             ),
             const SizedBox(height: 20),
-            // Recently Files Used
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -134,7 +178,7 @@ class _FilePageState extends State<FilesGroupPage> {
                           radius: 15,
                           backgroundColor: Colors.blue[200],
                           child: Text(
-                            member[0], // First character of the name
+                            member[0], 
                             style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
@@ -144,11 +188,12 @@ class _FilePageState extends State<FilesGroupPage> {
                         ),
                       );
                     }),
-
-                    // See all members circle
                     GestureDetector(
                       onTap: () {
-                        _showAllMembersDialog(context);
+                        _showAllMembers(
+                            context,
+                            widget
+                                .groupId); 
                       },
                       child: CircleAvatar(
                         radius: 15,
@@ -162,22 +207,19 @@ class _FilePageState extends State<FilesGroupPage> {
                     ),
 
                     const SizedBox(width: 8),
-
-                    // Invite new members button
                     ElevatedButton.icon(
                       onPressed: () {
-                        // Handle invite new member action
-                        _inviteNewMember(context);
+                        _showUsersDialog(context); 
                       },
                       style: ElevatedButton.styleFrom(
-                          shadowColor:
-                              Theme.of(context).cardColor.withAlpha(35),
-                          elevation: 0,
-                          backgroundColor:
-                              Theme.of(context).cardColor.withAlpha(30),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          )),
+                        shadowColor: Theme.of(context).cardColor.withAlpha(35),
+                        elevation: 0,
+                        backgroundColor:
+                            Theme.of(context).cardColor.withAlpha(30),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                       icon: const Icon(
                         Icons.share,
                         size: 10,
@@ -208,7 +250,6 @@ class _FilePageState extends State<FilesGroupPage> {
 
 class FilesTable extends StatefulWidget {
   final List<TableDataModle> data;
-  // final void Function(bool?)? onChanged;
   const FilesTable({
     super.key,
     required this.data,
@@ -343,3 +384,8 @@ class TableDataModle {
 
 Map<int, bool> selectedRows = {};
 int selectedCount = 0;
+
+void _showAllMembers(BuildContext context, String groupId) async {
+  final GroupController groupController = Get.find<GroupController>();
+  await groupController.getGroupDetails(groupId: int.parse(groupId));
+}

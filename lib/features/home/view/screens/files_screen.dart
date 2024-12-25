@@ -18,23 +18,17 @@ class _FilePageState extends State<FilePage> {
 
   Future<void> pickAndUploadFile() async {
     try {
-      // Step 1: Pick a file
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowedExtensions: ['pdf', 'doc', 'docx'],
         type: FileType.custom,
-        allowMultiple: false, // Set to false for single file selection
-        withData: true, // Ensures the bytes are loaded into memory (web)
+        allowMultiple: false, 
+        withData: true, 
       );
 
       if (result != null) {
         setState(() {
-          selectedFile = result.files.first; // Get the first selected file
+          selectedFile = result.files.first; 
         });
-
-        // Step 2: Upload the file to server
-        // await uploadFile(selectedFile!);
-      } else {
-        // User canceled the picker
       }
     } catch (e) {
       print("Error picking file: $e");
@@ -49,23 +43,19 @@ class _FilePageState extends State<FilePage> {
         padding: const EdgeInsets.all(16.0),
         height: MediaQuery.sizeOf(context).height,
         child: ListView(
-          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search TextField
             SearchTextField(
                 controller: TextEditingController(),
                 fileHandler: () {},
                 groupHandler: () {}),
 
             const SizedBox(height: 20),
-            // Recently Groups Used
             AddFileWidget(
               addFileFunction: () async {
                 await pickAndUploadFile();
               },
             ),
             const SizedBox(height: 20),
-            // Recently Files Used
             Text(
               'my_upload_files'.tr,
               style: const TextStyle(
@@ -93,7 +83,6 @@ class _FilePageState extends State<FilePage> {
 
 class FilesTable extends StatefulWidget {
   final List<TableDataModle> data;
-  // final void Function(bool?)? onChanged;
   const FilesTable({
     super.key,
     required this.data,
@@ -177,7 +166,7 @@ class _FilesTableState extends State<FilesTable> {
                         onChanged: (value) {
                           setState(() {
                             selectedCount += value! ? 1 : -1;
-                            selectedRows[index] = value ?? false;
+                            selectedRows[index] = value;
                           });
                         })),
                     DataCell(
@@ -318,7 +307,7 @@ void showActionDialog(BuildContext context) {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); 
             },
             child: const Text("Cancel"),
           ),

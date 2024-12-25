@@ -16,14 +16,12 @@ class HomePage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            // Search TextField
             SearchTextField(
                 controller: TextEditingController(),
                 fileHandler: () {},
                 groupHandler: () {}),
 
             const SizedBox(height: 20),
-            // Recently Groups Used
             Text(
               'recently_groups_used'.tr,
               style: const TextStyle(
@@ -33,7 +31,7 @@ class HomePage extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             SizedBox(
-              height: 120, // Fixed height for the horizontal ListView
+              height: 120, 
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: 8,
@@ -70,7 +68,6 @@ class HomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            // Recently Files Used
             Text(
               'recently_files_used'.tr,
               style: const TextStyle(
@@ -78,7 +75,6 @@ class HomePage extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            // const SizedBox(height: 0),
             SizedBox(
               height: MediaQuery.sizeOf(context).height - 200,
               child: Padding(
