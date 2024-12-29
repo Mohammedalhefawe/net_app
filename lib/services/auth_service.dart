@@ -63,13 +63,13 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> getUserInfo(int id) async {
-    final url =
-        Uri.parse('$showUserUrl/$id'); 
+  Future<Map<String, dynamic>> getUserInfo(int id, String token) async {
+    final url = Uri.parse('$showUserUrl/$id');
     final response = await http.get(
       url,
       headers: {
         "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
       },
     );
 

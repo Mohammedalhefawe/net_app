@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web1/features/auth/model/user_model.dart';
-import 'package:web1/features/home/model/group_model.dart';
+import 'package:web1/features/home/data/model/group_model.dart';
 import 'package:web1/services/group_service.dart';
 
 class GroupController extends GetxController {

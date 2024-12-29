@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:web1/features/home/view/screens/files_screen.dart';
 import 'package:web1/features/home/view/screens/groups_screen.dart';
 import 'package:web1/features/home/view/screens/home_screen.dart';
+import 'package:web1/features/home/view/screens/notification_screen.dart';
 import 'package:web1/features/home/view/screens/settings_screen.dart';
 import 'package:web1/features/home/view/widgets/info_section_widget.dart';
 
@@ -13,6 +14,7 @@ class DashboardController extends GetxController {
     const HomePage(),
     const FilePage(),
     const GroupsPage(),
+    NotificationsScreen(),
     const SettingsPage(),
     const InfoSectionWidget()
   ];
@@ -20,6 +22,7 @@ class DashboardController extends GetxController {
     const HomePage(),
     const FilePage(),
     const GroupsPage(),
+    NotificationsScreen(),
     const SettingsPage(),
     const InfoSectionWidget()
   ];

@@ -1,20 +1,21 @@
 import 'dart:io';
-import 'dart:typed_data'; 
+import 'dart:typed_data';
 import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web1/features/home/controller/groups_controller.dart';
 import 'package:web1/services/file_service.dart';
-import 'package:flutter/foundation.dart' show kIsWeb; 
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class FileController extends GetxController {
   var isLoading = false.obs;
 
   Future<void> uploadFileToGroup({
-    required String groupId, 
-    required bool status, 
-    File? file, 
-    Uint8List? fileBytes, 
+    required String groupId,
+    required bool status,
+    File? file,
+    Uint8List? fileBytes,
     String? fileName,
   }) async {
     final pref = await SharedPreferences.getInstance();
@@ -33,7 +34,7 @@ class FileController extends GetxController {
         status: status,
         file: file,
         fileBytes: fileBytes,
-        fileName: fileName, 
+        fileName: fileName,
       );
 
       if (response != null && response['message'] == 'Success') {
@@ -48,17 +49,18 @@ class FileController extends GetxController {
     }
   }
 
-  Future<void> pickAndUploadFile(String groupId, bool isCheckIn) async {
+  Future<void> pickAndUploadFile(
+      String groupId, bool isCheckIn, GroupsController controller) async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowMultiple: false,
-        type: FileType.any, 
+        type: FileType.any,
       );
 
       if (result != null) {
         if (kIsWeb) {
           Uint8List fileBytes = result.files.single.bytes!;
-          String fileName = result.files.single.name; 
+          String fileName = result.files.single.name;
 
           await uploadFileToGroup(
             groupId: groupId,
@@ -66,6 +68,7 @@ class FileController extends GetxController {
             fileBytes: fileBytes,
             fileName: fileName,
           );
+          controller.getFiles();
         } else {
           File file = File(result.files.single.path!);
 

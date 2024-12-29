@@ -17,7 +17,7 @@ class GroupService {
       url,
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer $token", 
+        "Authorization": "Bearer $token",
       },
     );
 
@@ -37,7 +37,7 @@ class GroupService {
       url,
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer $token", 
+        "Authorization": "Bearer $token",
       },
       body: jsonEncode({'name': groupName}),
     );
@@ -63,6 +63,7 @@ class GroupService {
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
+        "Authorization": "Bearer $token",
       },
       body: jsonEncode({
         'user_id': userId,
@@ -109,8 +110,7 @@ class GroupService {
     required int groupId,
     required String token,
   }) async {
-    final url =
-        Uri.parse('$showGroupUrl/$groupId'); 
+    final url = Uri.parse('$showGroupUrl/$groupId');
 
     final response = await http.get(
       url,
@@ -134,8 +134,7 @@ class GroupService {
     required String newName,
     required String token,
   }) async {
-    final url =
-        Uri.parse('$editGroupUrl/$groupId');
+    final url = Uri.parse('$editGroupUrl/$groupId');
 
     final response = await http.put(
       url,
@@ -157,8 +156,7 @@ class GroupService {
     required int groupId,
     required String token,
   }) async {
-    final url = Uri.parse(
-        '$deleteGroupUrl/$groupId'); 
+    final url = Uri.parse('$deleteGroupUrl/$groupId');
 
     final response = await http.delete(
       url,

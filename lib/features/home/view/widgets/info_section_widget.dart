@@ -15,13 +15,14 @@ class InfoSectionWidget extends StatelessWidget {
   Future<Map<String, dynamic>> fetchUserInfo() async {
     final prefs = await SharedPreferences.getInstance();
     final int? userId = prefs.getInt('user_id');
+    final token = prefs.getString('auth_token') ?? '';
 
     if (userId == null) {
       throw Exception('User ID not found');
     }
 
     final ApiService apiService = ApiService();
-    return await apiService.getUserInfo(userId); 
+    return await apiService.getUserInfo(userId, token);
   }
 
   @override
@@ -38,7 +39,7 @@ class InfoSectionWidget extends StatelessWidget {
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else if (snapshot.hasData) {
-              final userData = snapshot.data!['data']; 
+              final userData = snapshot.data!['data'];
 
               return ListView(
                 children: [

@@ -52,11 +52,18 @@ class AppTranslations extends Translations {
       'overview': 'Overview',
       'status': 'Status',
       'select': 'Select',
-      'action': 'Action',
-      'do not have an account? signup now' : 'Do Not Have An Account? Signup Now',
+      'action': 'Action : ',
+      'logs': 'Logs',
+      'do not have an account? signup now':
+          'Do Not Have An Account? Signup Now',
+      'date': 'Date : ',
+      'no_groups': 'No Groups Found',
     },
     'ar': {
-      'action': 'العمل',
+      'no_groups': 'لا توجد مجموعات',
+      'date': ' : التاريخ',
+      'logs': 'السجلات',
+      'action': ' : العمل',
       'select': 'حدد',
       'file_name': 'اسم الملف',
       'group_name': 'اسم المجموعة',
@@ -107,7 +114,7 @@ class AppTranslations extends Translations {
       'light': 'فاتح',
       'english': 'الانجليزية',
       'arabic': 'العربية',
-      'do not have an account? signup now' : 'ليس لديك حساب؟ سجل انشئ حساب الان',
+      'do not have an account? signup now': 'ليس لديك حساب؟ سجل انشئ حساب الان',
     },
   };
 

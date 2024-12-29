@@ -25,9 +25,6 @@ class GroupsPage extends StatelessWidget {
           if (groupController.isLoading.value) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (groupController.groups.isEmpty) {
-            return const Center(child: Text('No groups found.'));
-          }
 
           return ListView(
             children: [
@@ -37,7 +34,7 @@ class GroupsPage extends StatelessWidget {
                   groupHandler: () {}),
               const SizedBox(height: 20),
               AddGroupWidget(
-                onTap: () {
+                addGroupFunction: () {
                   _showAddGroupDialog(context, groupController);
                 },
               ),
@@ -50,85 +47,94 @@ class GroupsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              LayoutBuilder(builder: (context, constraints) {
-                return SizedBox(
-                  height: MediaQuery.sizeOf(context).height - 200,
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        childAspectRatio: 1 / 0.4,
-                        crossAxisCount: constraints.maxWidth > 1000
-                            ? 4
-                            : constraints.maxWidth > 500
-                                ? 3
-                                : 2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10),
-                    itemCount: groupController.groups.length,
-                    itemBuilder: (context, index) {
-                      final group = groupController.groups[index];
+              if (groupController.groups.isEmpty)
+                Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('no_groups'.tr),
+                  ],
+                ),
+              if (groupController.groups.isNotEmpty)
+                LayoutBuilder(builder: (context, constraints) {
+                  return SizedBox(
+                    height: MediaQuery.sizeOf(context).height - 200,
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          childAspectRatio: 1 / 0.4,
+                          crossAxisCount: constraints.maxWidth > 1000
+                              ? 4
+                              : constraints.maxWidth > 500
+                                  ? 3
+                                  : 2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10),
+                      itemCount: groupController.groups.length,
+                      itemBuilder: (context, index) {
+                        final group = groupController.groups[index];
 
-                      return InkWell(
-                        onTap: () {
-                          dashboardController.screens[2] =
-                              FilesGroupPage(groupId: group.id.toString());
-                          dashboardController.update();
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            gradient: LinearGradient(colors: [
-                              Theme.of(context).cardColor.withOpacity(0.1),
-                              Theme.of(context).cardColor.withOpacity(0.2),
-                              Theme.of(context).cardColor.withOpacity(0.35),
-                            ]),
-                          ),
-                          width: 200,
-                          child: Center(
-                            child: ListTile(
-                              leading: SvgPicture.string(
-                                fileIcon,
-                                width: 40,
-                                height: 40,
-                                color: Theme.of(context).cardColor,
-                              ),
-                              title: Text(
-                                group.name,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text(
-                                '${group.users.length} users in group',
-                                style: const TextStyle(color: Colors.black54),
-                              ),
-                              trailing: PopupMenuButton<String>(
-                                onSelected: (value) {
-                                  if (value == 'edit') {
-                                    _showEditGroupDialog(
-                                        context, groupController, group);
-                                  } else if (value == 'delete') {
-                                    _deleteGroup(groupController, group.id);
-                                  }
-                                },
-                                itemBuilder: (BuildContext context) =>
-                                    <PopupMenuEntry<String>>[
-                                  const PopupMenuItem<String>(
-                                    value: 'edit',
-                                    child: Text('Edit'),
-                                  ),
-                                  const PopupMenuItem<String>(
-                                    value: 'delete',
-                                    child: Text('Delete'),
-                                  ),
-                                ],
+                        return InkWell(
+                          onTap: () {
+                            dashboardController.screens[2] =
+                                FilesGroupPage(groupId: group.id.toString());
+                            dashboardController.update();
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              gradient: LinearGradient(colors: [
+                                Theme.of(context).cardColor.withOpacity(0.1),
+                                Theme.of(context).cardColor.withOpacity(0.2),
+                                Theme.of(context).cardColor.withOpacity(0.35),
+                              ]),
+                            ),
+                            width: 200,
+                            child: Center(
+                              child: ListTile(
+                                leading: SvgPicture.string(
+                                  fileIcon,
+                                  width: 40,
+                                  height: 40,
+                                  color: Theme.of(context).cardColor,
+                                ),
+                                title: Text(
+                                  group.name,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: Text(
+                                  '${group.users.length} users in group',
+                                  style: const TextStyle(color: Colors.black54),
+                                ),
+                                trailing: PopupMenuButton<String>(
+                                  onSelected: (value) {
+                                    if (value == 'edit') {
+                                      _showEditGroupDialog(
+                                          context, groupController, group);
+                                    } else if (value == 'delete') {
+                                      _deleteGroup(groupController, group.id);
+                                    }
+                                  },
+                                  itemBuilder: (BuildContext context) =>
+                                      <PopupMenuEntry<String>>[
+                                    const PopupMenuItem<String>(
+                                      value: 'edit',
+                                      child: Text('Edit'),
+                                    ),
+                                    const PopupMenuItem<String>(
+                                      value: 'delete',
+                                      child: Text('Delete'),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }),
+                        );
+                      },
+                    ),
+                  );
+                }),
             ],
           );
         }),
@@ -167,8 +173,7 @@ class GroupsPage extends StatelessWidget {
                         final groupName = groupNameController.text.trim();
                         if (groupName.isNotEmpty) {
                           await groupController.createGroup(groupName);
-                          Navigator.of(context)
-                              .pop(); 
+                          Navigator.of(context).pop();
                         } else {
                           Get.snackbar(
                             'Error',
@@ -192,39 +197,33 @@ class GroupsPage extends StatelessWidget {
 }
 
 class AddGroupWidget extends StatelessWidget {
-  final void Function()? onTap;
-  const AddGroupWidget({super.key, this.onTap});
+  final void Function()? addGroupFunction;
+  const AddGroupWidget({
+    super.key,
+    this.addGroupFunction,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Theme.of(context).primaryColor,
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                offset: Offset(0, 4),
-                blurRadius: 8,
-              ),
-            ],
-          ),
-          width: 200,
-          height: 50, 
-          child: Center(
+    return InkWell(
+      onTap: addGroupFunction,
+      child: Container(
+        width: double.infinity,
+        height: 100,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            gradient: LinearGradient(colors: [
+              Theme.of(context).cardColor.withOpacity(0.1),
+              Theme.of(context).cardColor.withOpacity(0.13),
+            ])),
+        child: Center(
             child: Text(
-              'add_group'.tr,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
+          'add_group'.tr,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
-        ),
+        )),
       ),
     );
   }

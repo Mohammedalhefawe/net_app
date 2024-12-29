@@ -43,6 +43,9 @@ dependencies:
   flutter_svg: ^2.0.14
   data_table_2: ^2.5.15
   file_picker: ^8.1.4
+  shared_preferences: ^2.3.4
+  dartz: ^0.10.1
+  sizer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

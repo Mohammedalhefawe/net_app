@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:web1/constants/icons_svg.dart';
+import 'package:web1/constants/text.dart';
 import 'package:web1/features/auth/controller/app_controller.dart';
 import 'package:web1/features/auth/controller/auth_controller.dart';
 import 'package:web1/features/home/view/widgets/search_text_filed.dart';
@@ -11,19 +12,19 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AuthController authController = Get.find<AuthController>(); 
+    final AuthController authController = Get.find<AuthController>();
 
     return Expanded(
       flex: 3,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
-          children: [            
+          children: [
             SearchTextField(
                 controller: TextEditingController(),
                 fileHandler: () {},
                 groupHandler: () {}),
-            const SizedBox(height: 20),    
+            const SizedBox(height: 20),
             Text(
               'settings'.tr,
               style: const TextStyle(
@@ -52,6 +53,10 @@ class SettingsPage extends StatelessWidget {
                         showLanguageDialog(context);
                       } else if (settings[index].tilte.tr == 'theme'.tr) {
                         showThemeDialog(context);
+                      } else if (settings[index].tilte.tr == 'help'.tr) {
+                        showHelpDialog(context);
+                      } else if (settings[index].tilte.tr == 'about'.tr) {
+                        showAboutDialog(context);
                       }
                     },
                   );
@@ -199,7 +204,7 @@ void showThemeDialog(BuildContext context) {
               ),
               title: Text('dark'.tr),
               onTap: () {
-                Navigator.pop(context); 
+                Navigator.pop(context);
                 if (!Get.isDarkMode) {
                   Get.changeThemeMode(ThemeMode.dark);
                 }
@@ -214,7 +219,7 @@ void showThemeDialog(BuildContext context) {
               ),
               title: Text('light'.tr),
               onTap: () {
-                Navigator.pop(context); 
+                Navigator.pop(context);
                 if (Get.isDarkMode) {
                   Get.changeThemeMode(ThemeMode.light);
                 }
@@ -225,11 +230,71 @@ void showThemeDialog(BuildContext context) {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); 
+              Navigator.pop(context);
             },
             child: Text('cancel'.tr),
           ),
         ],
+      );
+    },
+  );
+}
+
+void showAboutDialog(
+  BuildContext context,
+) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('help'.tr),
+        content: SizedBox(
+          width: 400,
+          height: 300,
+          child: ListView(
+            children: [
+              Get.locale?.languageCode == 'ar'
+                  ? const Text(
+                      aboutUsAr,
+                      textAlign: TextAlign.right,
+                    )
+                  : const Text(
+                      aboutUsEn,
+                      textAlign: TextAlign.left,
+                    )
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void showHelpDialog(
+  BuildContext context,
+) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('help'.tr),
+        content: SizedBox(
+          width: 400,
+          height: 300,
+          child: ListView(
+            children: [
+              Get.locale?.languageCode == 'ar'
+                  ? const Text(
+                      projectDescriptionAr,
+                      textAlign: TextAlign.right,
+                    )
+                  : const Text(
+                      projectDescriptionEn,
+                      textAlign: TextAlign.left,
+                    )
+            ],
+          ),
+        ),
       );
     },
   );

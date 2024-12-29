@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:web1/constants/icons_svg.dart';
 import 'package:web1/features/home/controller/dashboard_controller.dart';
+import 'package:web1/features/home/controller/files_controller.dart';
+import 'package:web1/features/home/view/screens/files_screen.dart';
 import 'add_file_button_widget.dart';
 import 'info_section_widget.dart';
 
@@ -85,17 +87,24 @@ class DashboardScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          AnimatedButtonDemo(
-                            onPressed: () {},
-                          ),
-
+                          GetBuilder(
+                              init: FilesController(),
+                              builder: (controller) {
+                                return AnimatedButtonDemo(
+                                  onPressed: () {
+                                    showAddDialog(context, controller);
+                                  },
+                                );
+                              }),
                           const SizedBox(
                             height: 30,
                           ),
                           buildNavItem(homeIcon, "home".tr, 0, false),
                           buildNavItem(fileIcon, "files".tr, 1, false),
                           buildNavItem(groupIcon, "groups".tr, 2, false),
-                          buildNavItem(settingIcon, "settings".tr, 3, false),
+                          buildNavItem(
+                              notificationIcon, "notifications".tr, 3, false),
+                          buildNavItem(settingIcon, "settings".tr, 4, false),
                           constraints.maxWidth <= 1200
                               ? buildNavItem(
                                   settingIcon, "storage info".tr, 4, false)
@@ -159,7 +168,7 @@ Widget buildNavItem(String icon, String title, int index, bool isPop) {
         }
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300), 
+        duration: const Duration(milliseconds: 300),
         color: isSelected
             ? Colors.blueGrey[700]
             : isHovered
@@ -209,8 +218,9 @@ void showScreenSelectorDialog(BuildContext context) {
                   buildNavItem(homeIcon, "home".tr, 0, true),
                   buildNavItem(fileIcon, "files".tr, 1, true),
                   buildNavItem(groupIcon, "groups".tr, 2, true),
-                  buildNavItem(settingIcon, "settings".tr, 3, true),
-                  buildNavItem(settingIcon, "storage info".tr, 4, true)
+                  buildNavItem(notificationIcon, "notifications".tr, 3, true),
+                  buildNavItem(settingIcon, "settings".tr, 4, true),
+                  buildNavItem(settingIcon, "storage info".tr, 5, true)
                 ],
               ),
             ),
