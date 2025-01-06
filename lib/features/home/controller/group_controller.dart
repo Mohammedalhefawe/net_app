@@ -24,7 +24,6 @@ class GroupController extends GetxController {
       final response = await GroupService().getAllGroups(token);
 
       if (response != null && response['message'] == 'success') {
-
         List<GroupModel> fetchedGroups = (response['data'] as List)
             .map((groupData) => GroupModel.fromJson(groupData))
             .toList();
@@ -56,7 +55,7 @@ class GroupController extends GetxController {
         Fluttertoast.showToast(msg: 'Group created successfully');
 
         GroupModel newGroup = GroupModel.fromJson(response['data']);
-        groups.add(newGroup); 
+        groups.add(newGroup);
       } else {
         Fluttertoast.showToast(msg: 'Failed to create group');
       }
@@ -148,7 +147,7 @@ class GroupController extends GetxController {
       ),
       confirm: ElevatedButton(
         onPressed: () {
-          Get.back(); 
+          Get.back();
         },
         child: const Text("Close"),
       ),
@@ -170,11 +169,10 @@ class GroupController extends GetxController {
           .editGroup(groupId: groupId, newName: newName, token: token);
 
       if (response != null && response['message'] == 'success') {
-        
         final groupIndex = groups.indexWhere((group) => group.id == groupId);
         if (groupIndex != -1) {
           groups[groupIndex].name = newName;
-          groups.refresh(); 
+          groups.refresh();
         }
         Fluttertoast.showToast(msg: 'Group updated successfully');
       } else {
@@ -202,8 +200,7 @@ class GroupController extends GetxController {
           await GroupService().deleteGroup(groupId: groupId, token: token);
 
       if (response != null && response['message'] == 'success') {
-        groups.removeWhere(
-            (group) => group.id == groupId);
+        groups.removeWhere((group) => group.id == groupId);
         Fluttertoast.showToast(msg: 'Group deleted successfully');
       } else {
         Fluttertoast.showToast(msg: 'Failed to delete group');

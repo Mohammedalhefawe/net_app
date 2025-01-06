@@ -22,7 +22,7 @@ class AuthController extends GetxController {
         await prefs.setString('auth_token', token);
         await prefs.setInt('user_id', userId);
 
-        return token; 
+        return token;
       } else {
         Fluttertoast.showToast(
             msg: response['data']['message'] ?? "Sign up failed.");
@@ -50,7 +50,7 @@ class AuthController extends GetxController {
         await prefs.setString('auth_token', token);
         await prefs.setInt('user_id', userId);
 
-        return token; 
+        return token;
       } else {
         Fluttertoast.showToast(
             msg: response['data']['message'] ?? "Login failed.");
@@ -95,9 +95,11 @@ class AuthController extends GetxController {
   }
 
   Future<List<UserModel>> getAllUsers() async {
+    final pref = await SharedPreferences.getInstance();
+    final token = pref.getString('auth_token') ?? '';
     isLoading.value = true;
     try {
-      final List<UserModel> users = await _apiService.getAllUsers();
+      final List<UserModel> users = await _apiService.getAllUsers(token);
       print("Fetched Users: ${users.map((e) => e.name).toList()}");
       return users;
     } catch (e) {

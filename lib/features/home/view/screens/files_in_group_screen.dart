@@ -46,6 +46,7 @@ class _FilePageState extends State<FilesGroupPage> {
       final List<UserModel> users = await authController.getAllUsers();
 
       showDialog(
+        // ignore: use_build_context_synchronously
         context: context,
         builder: (context) {
           UserModel? selectedUser;
@@ -53,9 +54,9 @@ class _FilePageState extends State<FilesGroupPage> {
           return StatefulBuilder(
             builder: (context, setState) {
               return AlertDialog(
-                title: const Text("Select a User"),
+                title: Text("Select a User".tr),
                 content: SizedBox(
-                  width: double.maxFinite,
+                  width: 400,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -119,7 +120,10 @@ class _FilePageState extends State<FilesGroupPage> {
                         );
                       }
                     },
-                    child: const Text("Add"),
+                    child: Text(
+                      "Add",
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                    ),
                   ),
                 ],
               );

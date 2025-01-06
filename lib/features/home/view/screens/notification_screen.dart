@@ -22,7 +22,7 @@ class NotificationsScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: controller.notificationsList.isEmpty
-                      ? const Center(child: Text('No notifications available.'))
+                      ? Center(child: Text('No notifications available.'.tr))
                       : ListView.builder(
                           itemCount: controller.notificationsList.length,
                           itemBuilder: (context, index) {

@@ -14,7 +14,7 @@ class DashboardController extends GetxController {
     const HomePage(),
     const FilePage(),
     const GroupsPage(),
-    NotificationsScreen(),
+    const NotificationsScreen(),
     const SettingsPage(),
     const InfoSectionWidget()
   ];
@@ -22,7 +22,7 @@ class DashboardController extends GetxController {
     const HomePage(),
     const FilePage(),
     const GroupsPage(),
-    NotificationsScreen(),
+    const NotificationsScreen(),
     const SettingsPage(),
     const InfoSectionWidget()
   ];

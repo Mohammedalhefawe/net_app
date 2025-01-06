@@ -80,12 +80,15 @@ class ApiService {
     }
   }
 
-  Future<List<UserModel>> getAllUsers() async {
+  Future<List<UserModel>> getAllUsers(String token) async {
     try {
       final url = Uri.parse(showAllUsersUrl);
       final response = await http.get(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer $token",
+        },
       );
 
       print('Response status: ${response.statusCode}');
