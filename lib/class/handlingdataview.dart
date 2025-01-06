@@ -18,7 +18,7 @@ class HandlingDataView extends StatelessWidget {
         ? Expanded(
             flex: 3,
             child: Container(
-              color: Colors.white,
+              color: Theme.of(context).scaffoldBackgroundColor,
               child: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -47,7 +47,7 @@ class HandlingDataRequest extends StatelessWidget {
         ? Expanded(
             flex: 3,
             child: Container(
-                color: Colors.white,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 child: const Center(
                   child: CircularProgressIndicator(
                       // color: AppColor.primaryColor,
