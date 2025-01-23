@@ -55,7 +55,7 @@ class FilesController extends GetxController {
     if (kIsWeb) {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['txt', 'pdf', 'doc', 'docx'],
+        allowedExtensions: ['txt'],
       );
       if (result != null && result.files.isNotEmpty) {
         webFile = result.files.first.bytes;
@@ -69,6 +69,18 @@ class FilesController extends GetxController {
         Fluttertoast.showToast(msg: "No file selected");
       }
     }
+  }
+
+  search(String value) async {
+    if (value.isNotEmpty) {
+      filesList = filesList
+          .where((element) =>
+              element.fileName.toLowerCase().contains(value.toLowerCase()))
+          .toList();
+    } else {
+      getFiles();
+    }
+    update();
   }
 
   getGroups() async {
@@ -94,6 +106,57 @@ class FilesController extends GetxController {
     }
   }
 
+  getReport(String id, {required String groupId}) async {
+    final pref = await SharedPreferences.getInstance();
+    final token = pref.getString('auth_token') ?? '';
+    statusRequest = StatusRequest.loading;
+    update();
+    var response =
+        await filesData.getReportData(token, id, 'file', groupId: groupId);
+    ResponseJson responseJson = handlingData(response);
+    statusRequest = responseJson.statusRequest;
+    update();
+    if (StatusRequest.success == statusRequest) {
+      Fluttertoast.showToast(msg: 'sucess');
+    } else {
+      Fluttertoast.showToast(msg: 'error');
+    }
+  }
+
+  getCompareFile(String id, {required String groupId}) async {
+    final pref = await SharedPreferences.getInstance();
+    final token = pref.getString('auth_token') ?? '';
+    statusRequest = StatusRequest.loading;
+    update();
+    var response = await filesData.downloadFileFromCompareData(token, id,
+        groupId: groupId);
+    ResponseJson responseJson = handlingData(response);
+    statusRequest = responseJson.statusRequest;
+    update();
+    if (StatusRequest.success == statusRequest) {
+      Fluttertoast.showToast(msg: 'sucess');
+    } else {
+      Fluttertoast.showToast(msg: 'error');
+    }
+  }
+
+  getArchiveFile(String id, {required String groupId}) async {
+    final pref = await SharedPreferences.getInstance();
+    final token = pref.getString('auth_token') ?? '';
+    statusRequest = StatusRequest.loading;
+    update();
+    var response = await filesData.downloadFileFromArchiveData(token, id,
+        groupId: groupId);
+    ResponseJson responseJson = handlingData(response);
+    statusRequest = responseJson.statusRequest;
+    update();
+    if (StatusRequest.success == statusRequest) {
+      Fluttertoast.showToast(msg: 'sucess');
+    } else {
+      Fluttertoast.showToast(msg: 'error');
+    }
+  }
+
   deleteFiles({String? id}) async {
     final pref = await SharedPreferences.getInstance();
     final token = pref.getString('auth_token') ?? '';
@@ -112,14 +175,19 @@ class FilesController extends GetxController {
       fileId = id;
     }
     print("=========== $fileId");
-    var response = await filesData.deleteFileData(token, fileId);
+    var response = await filesData.deleteFileData(
+      token,
+      fileId,
+    );
     ResponseJson responseJson = handlingData(response);
     statusRequest = responseJson.statusRequest;
     update();
     if (StatusRequest.success == statusRequest) {
       Fluttertoast.showToast(msg: 'deleted file successfully');
       checkFiles.clear();
-      getFiles();
+      Future.delayed(const Duration(seconds: 1), () {
+        getFiles();
+      });
     } else {
       print('error');
       Fluttertoast.showToast(msg: 'error');
@@ -179,11 +247,13 @@ class FilesController extends GetxController {
 
       for (var element in data.data.lastFiles) {
         filesList.add(TableDataModle(
-          groupId: element.groups[0].id.toString(),
+          archives: element.archives,
+          groupId:
+              element.groups.isEmpty ? '1' : element.groups[0].id.toString(),
           logs: element.fileLogs,
           fileName: element.name,
           id: element.id.toString(),
-          groupName: element.groups[0].name,
+          groupName: element.groups.isEmpty ? ' ' : element.groups[0].name,
           state: element.status == 0 ? 'open' : 'closed',
           lastEdit:
               element.lastModify == null ? 'null' : element.lastModify!.date,
@@ -217,8 +287,10 @@ class FilesController extends GetxController {
         selectedGroup = null;
         isUploadingImage = false;
         Get.back();
-        getFiles();
         Fluttertoast.showToast(msg: 'success');
+        Future.delayed(const Duration(seconds: 1), () {
+          getFiles();
+        });
       } else {
         print('error');
         Fluttertoast.showToast(msg: 'error');

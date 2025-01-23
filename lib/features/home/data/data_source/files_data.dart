@@ -26,6 +26,25 @@ class FilesData {
     return response.fold((l) => l, (r) => r);
   }
 
+  getReportData(String token, String id, String type,
+      {required String groupId}) async {
+    DateTime now = DateTime.now();
+    DateTime lastYear = now.subtract(const Duration(days: 365));
+
+    String nowDate =
+        "${lastYear.year}-${lastYear.month.toString().padLeft(2, '0')}-${lastYear.day.toString().padLeft(2, '0')}";
+
+    DateTime nextYear = now.add(const Duration(days: 365));
+
+    String nextYearDate =
+        "${nextYear.year}-${nextYear.month.toString().padLeft(2, '0')}-${nextYear.day.toString().padLeft(2, '0')}";
+    var response = await crud.getFiles(
+        linkurl:
+            'http://127.0.0.1:8000/api/$type/report/$id?from_date=$nowDate&to_date=$nextYearDate&group_id=$groupId',
+        headers: {'authorization': 'Bearer $token'});
+    return response.fold((l) => l, (r) => r);
+  }
+
   getNotificationsData(String token) async {
     var response = await crud.getData(
         linkurl: 'http://127.0.0.1:8000/api/user/notification/all',
@@ -41,24 +60,56 @@ class FilesData {
     return response.fold((l) => l, (r) => r);
   }
 
-  getFilesInGroupData(String token, String groupId) async {
-    // print('token: $token');
+  getArchiveData(String token, String id) async {
     var response = await crud.getData(
-        linkurl: 'http://127.0.0.1:8000/api/group/show-by/$groupId',
+        linkurl: 'http://127.0.0.1:8000/api/file/get-archive/$id',
         headers: {'authorization': 'Bearer $token'});
     return response.fold((l) => l, (r) => r);
   }
 
-  deleteFileData(String token, String fileId) async {
+  getFilesInGroupData(String token, String groupId) async {
+    // print('token: $token');
+    var response = await crud.getData(
+        linkurl:
+            'http://127.0.0.1:8000/api/group/show-by/$groupId?group_id=$groupId',
+        headers: {'authorization': 'Bearer $token'});
+    return response.fold((l) => l, (r) => r);
+  }
+
+  deleteFileData(
+    String token,
+    String fileId,
+  ) async {
     var response = await crud.deleteData(
         linkurl: 'http://127.0.0.1:8000/api/file/delete/$fileId',
         headers: {'authorization': 'Bearer $token'});
     return response.fold((l) => l, (r) => r);
   }
 
-  downloadFileData(String token, String fileId) async {
+  downloadFileData(
+    String token,
+    String fileId,
+  ) async {
     var response = await crud.getFiles(
         linkurl: 'http://127.0.0.1:8000/api/file/download/$fileId',
+        headers: {'authorization': 'Bearer $token'});
+    return response.fold((l) => l, (r) => r);
+  }
+
+  downloadFileFromArchiveData(String token, String fileId,
+      {required String groupId}) async {
+    var response = await crud.getFiles(
+        linkurl:
+            'http://127.0.0.1:8000/api/file/archive/$fileId?group_id=$groupId',
+        headers: {'authorization': 'Bearer $token'});
+    return response.fold((l) => l, (r) => r);
+  }
+
+  downloadFileFromCompareData(String token, String fileId,
+      {required String groupId}) async {
+    var response = await crud.getFiles(
+        linkurl:
+            'http://127.0.0.1:8000/api/file/compare/$fileId?group_id=$groupId',
         headers: {'authorization': 'Bearer $token'});
     return response.fold((l) => l, (r) => r);
   }

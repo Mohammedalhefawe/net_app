@@ -1,3 +1,4 @@
+import 'package:web1/features/home/data/model/archive_model.dart';
 import 'package:web1/features/home/data/model/files_model.dart';
 
 class FilesInGroupModel {
@@ -17,7 +18,7 @@ class FilesInGroupModel {
 class Data {
   int id;
   String name;
-  List<dynamic> users; // Assuming dynamic for an empty array
+  final List<UserData> users;
   List<FileMo> files;
 
   Data(
@@ -30,9 +31,12 @@ class Data {
     return Data(
       id: json['id'],
       name: json['name'],
-      users: List<dynamic>.from(json['users']),
-      files: List<FileMo>.from(
-          json['files'].map((file) => FileMo.fromJson(file))),
+      users: (json['users'] as List<dynamic>?)
+              ?.map((item) => UserData.fromJson(item))
+              .toList() ??
+          [],
+      files:
+          List<FileMo>.from(json['files'].map((file) => FileMo.fromJson(file))),
     );
   }
 }
@@ -43,9 +47,10 @@ class FileMo {
   String path;
   String name;
   int userId;
-  User user;
+  // User user;
   List<FileLog> fileLogs;
   List<Group> groups;
+  List<ArchiveData> archives;
   FileLog? lastModify;
   dynamic lastView;
 
@@ -55,7 +60,8 @@ class FileMo {
     required this.path,
     required this.name,
     required this.userId,
-    required this.user,
+    // required this.user,
+    required this.archives,
     required this.fileLogs,
     required this.groups,
     this.lastModify,
@@ -69,7 +75,10 @@ class FileMo {
       path: json['path'],
       name: json['name'],
       userId: json['user_id'],
-      user: User.fromJson(json['user']),
+      archives: (json['archive'] as List<dynamic>)
+          .map((item) => ArchiveData.fromJson(item))
+          .toList(),
+      // user: User.fromJson(json['user']),
       fileLogs: List<FileLog>.from(
           json['file_logs'].map((log) => FileLog.fromJson(log))),
       groups: List<Group>.from(

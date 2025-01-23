@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web1/class/handlingdataview.dart';
 import 'package:web1/features/home/controller/notifications_controller.dart';
+import 'package:intl/intl.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -22,7 +23,16 @@ class NotificationsScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: controller.notificationsList.isEmpty
-                      ? Center(child: Text('No notifications available.'.tr))
+                      ? Center(
+                          child: Text(
+                          'No notifications available.'.tr,
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Get.isDarkMode
+                                  ? Colors.white
+                                  : Colors.black54),
+                        ))
                       : ListView.builder(
                           itemCount: controller.notificationsList.length,
                           itemBuilder: (context, index) {
@@ -36,7 +46,7 @@ class NotificationsScreen extends StatelessWidget {
                                     color: Colors.blue),
                                 title: Text(notification.content),
                                 subtitle: Text(
-                                  'Created: ${notification.createdAt}',
+                                  'Created in  ${timeWithFormate(notification.createdAt)}',
                                   style: const TextStyle(
                                       fontSize: 12, color: Colors.grey),
                                 ),
@@ -48,4 +58,16 @@ class NotificationsScreen extends StatelessWidget {
           );
         });
   }
+}
+
+timeWithFormate(timestamp) {
+  DateTime dateTime = DateTime.parse(timestamp);
+
+  // Extracting the date
+  String date = DateFormat('yyyy-MM-dd').format(dateTime);
+
+  // Extracting the time
+  String time = DateFormat('HH:mm').format(dateTime);
+
+  return 'Date => $date Time => $time';
 }

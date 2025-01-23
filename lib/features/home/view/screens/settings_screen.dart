@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web1/class/handlingdataview.dart';
 import 'package:web1/constants/icons_svg.dart';
 import 'package:web1/constants/text.dart';
 import 'package:web1/features/auth/controller/app_controller.dart';
 import 'package:web1/features/auth/controller/auth_controller.dart';
+import 'package:web1/features/home/controller/settings_controller.dart';
 import 'package:web1/features/home/view/widgets/search_text_filed.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -13,60 +16,76 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthController authController = Get.find<AuthController>();
+    final SettingsController settingsController = Get.put(SettingsController());
 
-    return Expanded(
-      flex: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            SearchTextField(
-                controller: TextEditingController(),
-                fileHandler: () {},
-                groupHandler: () {}),
-            const SizedBox(height: 20),
-            Text(
-              'settings'.tr,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+    return GetBuilder(
+        init: settingsController,
+        builder: (settingsController) {
+          return HandlingDataRequest(
+            statusRequest: settingsController.statusRequest,
+            widget: Expanded(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView(
+                  children: [
+                    const SearchTextField(),
+                    const SizedBox(height: 20),
+                    Text(
+                      'settings'.tr,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      height: MediaQuery.sizeOf(context).height - 200,
+                      child: GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                childAspectRatio: 1 / 0.2,
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10),
+                        itemCount: settings.length,
+                        itemBuilder: (context, index) {
+                          return SettingItemWidget(
+                            title: settings[index].tilte.tr,
+                            icon: settings[index].icon,
+                            onTap: () async {
+                              if (settings[index].tilte.tr == 'logout'.tr) {
+                                authController.logOut();
+                              } else if (settings[index].tilte.tr ==
+                                  'language'.tr) {
+                                showLanguageDialog(context);
+                              } else if (settings[index].tilte.tr ==
+                                  'theme'.tr) {
+                                showThemeDialog(context);
+                              } else if (settings[index].tilte.tr ==
+                                  'help'.tr) {
+                                showHelpDialog(context);
+                              } else if (settings[index].tilte.tr ==
+                                  'about'.tr) {
+                                showAboutDialog(context);
+                              } else if (settings[index].tilte.tr ==
+                                  'report'.tr) {
+                                final pref =
+                                    await SharedPreferences.getInstance();
+                                final id = pref.getInt('user_id') ?? '';
+                                settingsController.getReport(id.toString());
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: MediaQuery.sizeOf(context).height - 200,
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    childAspectRatio: 1 / 0.2,
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10),
-                itemCount: settings.length,
-                itemBuilder: (context, index) {
-                  return SettingItemWidget(
-                    title: settings[index].tilte.tr,
-                    icon: settings[index].icon,
-                    onTap: () {
-                      if (settings[index].tilte.tr == 'logout'.tr) {
-                        authController.logOut();
-                      } else if (settings[index].tilte.tr == 'language'.tr) {
-                        showLanguageDialog(context);
-                      } else if (settings[index].tilte.tr == 'theme'.tr) {
-                        showThemeDialog(context);
-                      } else if (settings[index].tilte.tr == 'help'.tr) {
-                        showHelpDialog(context);
-                      } else if (settings[index].tilte.tr == 'about'.tr) {
-                        showAboutDialog(context);
-                      }
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 }
 
@@ -128,6 +147,7 @@ class SettingItem {
 List<SettingItem> settings = [
   SettingItem(tilte: "language", icon: languageIcon),
   SettingItem(tilte: "theme", icon: themeIcon),
+  SettingItem(tilte: "report", icon: fileIcon),
   SettingItem(tilte: "help", icon: helpIcon),
   SettingItem(tilte: "about", icon: aboutIcon),
   SettingItem(tilte: "logout", icon: logoutIcon),

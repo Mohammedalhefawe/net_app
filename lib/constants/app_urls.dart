@@ -13,5 +13,4 @@ class AppUrls {
   static String createUserGroupUrl = "${url}user_group/create";
   static String getAllUsersGroupUrl = "${url}user_group/all";
   static String uploadFileUrl = "${url}file/upload";
-  
 }

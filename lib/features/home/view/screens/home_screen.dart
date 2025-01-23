@@ -8,6 +8,7 @@ import 'package:web1/features/home/controller/dashboard_controller.dart';
 import 'package:web1/features/home/controller/home_controller.dart';
 import 'package:web1/features/home/data/model/files_model.dart';
 import 'package:web1/features/home/view/screens/files_in_group_screen.dart';
+import 'package:web1/features/home/view/screens/files_screen.dart';
 import 'package:web1/features/home/view/widgets/search_text_filed.dart';
 
 class HomePage extends StatelessWidget {
@@ -33,9 +34,10 @@ class HomePage extends StatelessWidget {
                 child: ListView(
                   children: [
                     SearchTextField(
-                        controller: TextEditingController(),
-                        fileHandler: () {},
-                        groupHandler: () {}),
+                      onChanged: (value) {
+                        controller.search(value);
+                      },
+                    ),
                     const SizedBox(height: 20),
                     Text(
                       'recently_groups_used'.tr,
@@ -47,57 +49,72 @@ class HomePage extends StatelessWidget {
                     const SizedBox(height: 10),
                     SizedBox(
                       height: 120,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: controller.groupsList.length,
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onTap: () {
-                              dashboardController.selectedScreenIndex = 2;
-                              dashboardController.screens[2] = FilesGroupPage(
-                                  groupId: controller.groupsList[index].id
-                                      .toString());
-                              dashboardController.update();
-                            },
-                            child: SizedBox(
-                              child: Container(
-                                margin:
-                                    const EdgeInsetsDirectional.only(end: 15),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    gradient: LinearGradient(colors: [
-                                      Theme.of(context)
-                                          .cardColor
-                                          .withOpacity(0.1),
-                                      Theme.of(context)
-                                          .cardColor
-                                          .withOpacity(0.2),
-                                      Theme.of(context)
-                                          .cardColor
-                                          .withOpacity(0.35),
-                                    ])),
-                                width: 200,
-                                child: Center(
-                                  child: ListTile(
-                                    leading: SvgPicture.string(
-                                      fileIcon,
-                                      width: 40,
-                                      height: 40,
-                                      color: Theme.of(context).cardColor,
-                                    ),
-                                    title: Text(
-                                        controller.groupsList[index].title),
-                                    subtitle: Text(
-                                      '${controller.groupsList[index].subTitle}',
+                      child: controller.groupsList.isEmpty
+                          ? Center(
+                              child: Text(
+                                'No groups',
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Get.isDarkMode
+                                        ? Colors.white
+                                        : Colors.black54),
+                              ),
+                            )
+                          : ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: controller.groupsList.length,
+                              shrinkWrap: true,
+                              itemBuilder: (context, index) {
+                                return InkWell(
+                                  onTap: () {
+                                    dashboardController.selectedScreenIndex = 2;
+                                    dashboardController.screens[2] =
+                                        FilesGroupPage(
+                                            groupId: controller
+                                                .groupsList[index].id
+                                                .toString());
+                                    dashboardController.update();
+                                  },
+                                  child: SizedBox(
+                                    child: Container(
+                                      margin: const EdgeInsetsDirectional.only(
+                                          end: 15),
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          gradient: LinearGradient(colors: [
+                                            Theme.of(context)
+                                                .cardColor
+                                                .withOpacity(0.1),
+                                            Theme.of(context)
+                                                .cardColor
+                                                .withOpacity(0.2),
+                                            Theme.of(context)
+                                                .cardColor
+                                                .withOpacity(0.35),
+                                          ])),
+                                      width: 200,
+                                      child: Center(
+                                        child: ListTile(
+                                          leading: SvgPicture.string(
+                                            fileIcon,
+                                            width: 40,
+                                            height: 40,
+                                            color: Theme.of(context).cardColor,
+                                          ),
+                                          title: Text(controller
+                                              .groupsList[index].title),
+                                          subtitle: Text(
+                                            '${controller.groupsList[index].subTitle}',
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
                     ),
                     const SizedBox(height: 20),
                     Text(
@@ -138,13 +155,13 @@ class FilesTable extends StatelessWidget {
       height: MediaQuery.sizeOf(context).height - 200,
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 0),
       child: DataTable2(
-          empty: const Center(
+          empty: Center(
             child: Text(
               'No Files Found',
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black54),
+                  color: Get.isDarkMode ? Colors.white : Colors.black54),
             ),
           ),
           columnSpacing: 12,
@@ -216,11 +233,19 @@ class FilesTable extends StatelessWidget {
                           height: 20,
                           color: Colors.blue,
                         ),
-                        title: Text(data[index].fileName),
+                        title: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.topStart,
+                            child: Text(
+                              data[index].fileName.split('.').first,
+                              style: const TextStyle(fontSize: 15),
+                            )),
                       ),
                     ),
                     DataCell(Text(data[index].groupName)),
-                    DataCell(Text(data[index].overView)),
+                    DataCell(FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(data[index].lastEdit.split(' ')[0]))),
                     DataCell(Text(data[index].state)),
                     DataCell(
                       controller.checkFiles.isNotEmpty
@@ -241,7 +266,15 @@ class FilesTable extends StatelessWidget {
                                   showAction(context, controller, 'logs',
                                       index: index);
                                 } else if (value == 'report') {
-                                  showAction(context, controller, 'report',
+                                  showAction(
+                                    context,
+                                    controller,
+                                    'report',
+                                    index: index,
+                                    fileId: data[index].id,
+                                  );
+                                } else if (value == 'archive') {
+                                  showAction(context, controller, 'archive',
                                       index: index);
                                 }
                               },
@@ -271,6 +304,10 @@ class FilesTable extends StatelessWidget {
                                   value: 'report',
                                   child: Text('report'.tr),
                                 ),
+                                PopupMenuItem<String>(
+                                  value: 'archive',
+                                  child: Text('archive'.tr),
+                                ),
                               ],
                             ),
                     ),
@@ -287,8 +324,11 @@ void showAction(BuildContext context, HomeController controller, String type,
     controller.deleteFiles(id: fileId);
   } else if (index != null && type == 'logs') {
     showLogDialog(context, controller.filesList[index].logs);
-  } else if (index != null && type == 'report') {
-    // controller.deleteFiles(id: fileId);
+  } else if (index != null && type == 'report' && fileId != null) {
+    controller.getReport(fileId, groupId: controller.filesList[index].groupId);
+  } else if (type == 'archive' && index != null) {
+    showArchiveDialog(context, controller.filesList[index].archives,
+        groupId: controller.filesList[index].groupId);
   }
 }
 

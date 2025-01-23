@@ -25,6 +25,17 @@ class HomeController extends GetxController {
   GlobalKey<FormState>? formstate = GlobalKey<FormState>();
   List<String> checkFiles = [];
 
+  search(String value) async {
+    if (value.isNotEmpty) {
+      filesList = filesList
+          .where((element) => element.fileName.contains(value))
+          .toList();
+    } else {
+      getFiles();
+    }
+    update();
+  }
+
   checkFile(int index, String id, bool value) {
     if (value) {
       checkFiles.add(id);
@@ -44,7 +55,7 @@ class HomeController extends GetxController {
     if (kIsWeb) {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['txt', 'pdf', 'doc', 'docx'],
+        allowedExtensions: ['txt'],
       );
       if (result != null && result.files.isNotEmpty) {
         webFile = result.files.first.bytes;
@@ -75,6 +86,7 @@ class HomeController extends GetxController {
       for (var element in data) {
         groupsList.add(ObjectDropdownFormField(
           title: element.name,
+          subTitle: '#${element.id}',
           id: element.id.toString(),
         ));
       }
@@ -109,9 +121,28 @@ class HomeController extends GetxController {
     if (StatusRequest.success == statusRequest) {
       Fluttertoast.showToast(msg: 'deleted file successfully');
       checkFiles.clear();
-      getFiles();
+      Future.delayed(const Duration(seconds: 1), () {
+        getFiles();
+      });
     } else {
       print('error');
+      Fluttertoast.showToast(msg: 'error');
+    }
+  }
+
+  getReport(String id, {required String groupId}) async {
+    final pref = await SharedPreferences.getInstance();
+    final token = pref.getString('auth_token') ?? '';
+    statusRequest = StatusRequest.loading;
+    update();
+    var response =
+        await filesData.getReportData(token, id, 'file', groupId: groupId);
+    ResponseJson responseJson = handlingData(response);
+    statusRequest = responseJson.statusRequest;
+    update();
+    if (StatusRequest.success == statusRequest) {
+      Fluttertoast.showToast(msg: 'sucess');
+    } else {
       Fluttertoast.showToast(msg: 'error');
     }
   }
@@ -169,11 +200,13 @@ class HomeController extends GetxController {
 
       for (var element in data.data.lastFiles) {
         filesList.add(TableDataModle(
-          groupId: element.groups[0].id.toString(),
+          archives: element.archives,
+          groupId:
+              element.groups.isEmpty ? '1' : element.groups[0].id.toString(),
           logs: element.fileLogs,
           fileName: element.name,
           id: element.id.toString(),
-          groupName: element.groups[0].name,
+          groupName: element.groups.isEmpty ? ' ' : element.groups[0].name,
           state: element.status == 0 ? 'open' : 'closed',
           lastEdit:
               element.lastModify == null ? 'null' : element.lastModify!.date,
@@ -206,9 +239,11 @@ class HomeController extends GetxController {
         webFile = null;
         selectedGroup = null;
         isUploadingImage = false;
-        Get.back();
-        getFiles();
+        // Get.back();
         Fluttertoast.showToast(msg: 'success');
+        Future.delayed(const Duration(seconds: 1), () {
+          getFiles();
+        });
       } else {
         print('error');
         Fluttertoast.showToast(msg: 'error');

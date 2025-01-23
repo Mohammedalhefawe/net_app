@@ -11,22 +11,28 @@ class GroupService {
   final String deleteGroupUrl = AppUrls.deleteGroupUrl;
 
   Future<Map<String, dynamic>?> getAllGroups(String token) async {
-    final url = Uri.parse(getAllGroupsUrl);
+    final url = Uri.parse('http://127.0.0.1:8000/api/group/all');
 
-    final response = await http.get(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-    );
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      print(response.body);
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to load groups: ${response.body}');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print(response.body);
+        print('Success: ${response.body}');
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to load groups: ${response.body}');
+      }
+    } catch (e) {
+      print('Error: $e');
     }
+    return null;
   }
 
   Future<Map<String, dynamic>?> createGroup(
@@ -134,7 +140,7 @@ class GroupService {
     required String newName,
     required String token,
   }) async {
-    final url = Uri.parse('$editGroupUrl/$groupId');
+    final url = Uri.parse('$editGroupUrl/$groupId?group_id=$groupId');
 
     final response = await http.put(
       url,
@@ -156,7 +162,7 @@ class GroupService {
     required int groupId,
     required String token,
   }) async {
-    final url = Uri.parse('$deleteGroupUrl/$groupId');
+    final url = Uri.parse('$deleteGroupUrl/$groupId?group_id=$groupId');
 
     final response = await http.delete(
       url,

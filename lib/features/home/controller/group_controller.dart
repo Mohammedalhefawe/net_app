@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web1/features/auth/model/user_model.dart';
 import 'package:web1/features/home/data/model/group_model.dart';
 import 'package:web1/services/group_service.dart';
 
@@ -21,9 +19,12 @@ class GroupController extends GetxController {
 
     isLoading.value = true;
     try {
+      print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
       final response = await GroupService().getAllGroups(token);
+      print(response);
+      print(';;;;;;;');
 
-      if (response != null && response['message'] == 'success') {
+      if (response != null && response['message'] == 'Success') {
         List<GroupModel> fetchedGroups = (response['data'] as List)
             .map((groupData) => GroupModel.fromJson(groupData))
             .toList();
@@ -35,6 +36,16 @@ class GroupController extends GetxController {
       Fluttertoast.showToast(msg: "Error: $e");
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  search(String value) async {
+    if (value.isNotEmpty) {
+      groups.value = groups
+          .where((element) => element.name.toLowerCase().contains(value))
+          .toList();
+    } else {
+      await getAllGroups();
     }
   }
 
@@ -90,69 +101,46 @@ class GroupController extends GetxController {
       if (response != null && response['message'] == 'success') {
         Fluttertoast.showToast(msg: 'User added to group successfully!');
       } else {
-        Fluttertoast.showToast(msg: 'Failed to add user to group');
+        Fluttertoast.showToast(
+            msg: 'Failed to add user to group', timeInSecForIosWeb: 3);
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: "Error: $e");
+      Fluttertoast.showToast(msg: "Error: $e", timeInSecForIosWeb: 3);
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> getGroupDetails({required int groupId}) async {
-    final pref = await SharedPreferences.getInstance();
-    final token = pref.getString('auth_token') ?? '';
+  // Future<void> getGroupDetails({required int groupId}) async {
+  //   final pref = await SharedPreferences.getInstance();
+  //   final token = pref.getString('auth_token') ?? '';
 
-    if (token.isEmpty) {
-      Fluttertoast.showToast(msg: 'Token not found!');
-      return;
-    }
+  //   if (token.isEmpty) {
+  //     Fluttertoast.showToast(msg: 'Token not found!');
+  //     return;
+  //   }
 
-    isLoading.value = true;
-    try {
-      final response =
-          await GroupService().getGroupDetails(groupId: groupId, token: token);
+  //   isLoading.value = true;
+  //   try {
+  //     final response =
+  //         await GroupService().getGroupDetails(groupId: groupId, token: token);
 
-      if (response != null && response['message'] == 'success') {
-        final groupData = response['data'];
-        final groupUsers = groupData['users'] as List;
-        List<UserModel> users =
-            groupUsers.map((user) => UserModel.fromJson(user)).toList();
+  //     if (response != null && response['message'] == 'success') {
+  //       final groupData = response['data'];
+  //       final groupUsers = groupData['users'] as List;
+  //       List<UserModel> users =
+  //           groupUsers.map((user) => UserModel.fromJson(user)).toList();
 
-        _showGroupMembersDialog(users);
-      } else {
-        Fluttertoast.showToast(msg: 'Failed to load group details');
-      }
-    } catch (e) {
-      Fluttertoast.showToast(msg: "Error: $e");
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  void _showGroupMembersDialog(List<UserModel> users) {
-    Get.defaultDialog(
-      title: "Group Members",
-      content: Column(
-        children: users.map((user) {
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue[200],
-              child: Text(user.name![0].toUpperCase()),
-            ),
-            title: Text(user.name ?? 'Unknown'),
-            subtitle: Text(user.email ?? 'No email'),
-          );
-        }).toList(),
-      ),
-      confirm: ElevatedButton(
-        onPressed: () {
-          Get.back();
-        },
-        child: const Text("Close"),
-      ),
-    );
-  }
+  //       _showGroupMembersDialog(users);
+  //     } else {
+  //       Fluttertoast.showToast(msg: 'Failed to load group details');
+  //     }
+  //   } catch (e) {
+  //     Fluttertoast.showToast(msg: "Error: $e");
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
 
   Future<void> editGroup(int groupId, String newName) async {
     final pref = await SharedPreferences.getInstance();

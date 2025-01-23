@@ -1,3 +1,5 @@
+import 'package:web1/features/home/data/model/files_model.dart';
+
 class GroupsModel {
   final List<GroupData> data;
   final String message;
@@ -37,6 +39,7 @@ class GroupData {
   });
 
   factory GroupData.fromJson(Map<String, dynamic> json) {
+   
     return GroupData(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
@@ -51,39 +54,6 @@ class GroupData {
     return {
       'id': id,
       'name': name,
-      'users': users.map((item) => item.toJson()).toList(),
-    };
-  }
-}
-
-class UserData {
-  final int id;
-  final String name;
-  final String email;
-  final String number;
-
-  UserData({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.number,
-  });
-
-  factory UserData.fromJson(Map<String, dynamic> json) {
-    return UserData(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      number: json['number'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'email': email,
-      'number': number,
     };
   }
 }

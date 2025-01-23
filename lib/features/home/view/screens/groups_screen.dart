@@ -29,9 +29,10 @@ class GroupsPage extends StatelessWidget {
           return ListView(
             children: [
               SearchTextField(
-                  controller: TextEditingController(),
-                  fileHandler: () {},
-                  groupHandler: () {}),
+                onChanged: (value) {
+                  groupController.search(value);
+                },
+              ),
               const SizedBox(height: 20),
               AddGroupWidget(
                 addGroupFunction: () {
@@ -103,7 +104,7 @@ class GroupsPage extends StatelessWidget {
                                       fontWeight: FontWeight.bold),
                                 ),
                                 subtitle: Text(
-                                  '${group.users.length} users in group',
+                                  '#${group.id}',
                                   style: const TextStyle(color: Colors.black54),
                                 ),
                                 trailing: PopupMenuButton<String>(

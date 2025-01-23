@@ -54,7 +54,8 @@ class FileController extends GetxController {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowMultiple: false,
-        type: FileType.any,
+        type: FileType.custom,
+        allowedExtensions: ['txt'],
       );
 
       if (result != null) {

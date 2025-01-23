@@ -150,6 +150,7 @@ Widget buildNavItem(String icon, String title, int index, bool isPop) {
   final bool isHovered = controller.hoveredIndex == index;
 
   return MouseRegion(
+    cursor: SystemMouseCursors.click,
     onEnter: (_) {
       controller.hoveredIndex = index;
       controller.updateUI();

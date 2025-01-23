@@ -1,3 +1,5 @@
+import 'package:web1/features/home/data/model/archive_model.dart';
+
 class FilesModel {
   final UserData data;
   final String message;
@@ -47,9 +49,10 @@ class FileData {
   final String path;
   final String name;
   final int userId;
-  final User user;
+  // final User user;
   final List<FileLog> fileLogs;
   final List<Group> groups;
+  final List<ArchiveData> archives;
   final FileLog? lastModify;
   final FileLog? lastView;
 
@@ -59,8 +62,9 @@ class FileData {
     required this.path,
     required this.name,
     required this.userId,
-    required this.user,
+    // required this.user,
     required this.fileLogs,
+    required this.archives,
     required this.groups,
     this.lastModify,
     this.lastView,
@@ -73,7 +77,10 @@ class FileData {
       path: json['path'] ?? '',
       name: json['name'] ?? '',
       userId: json['user_id'] ?? 0,
-      user: User.fromJson(json['user']),
+      // user: User.fromJson(json['user']),
+      archives: (json['archive'] as List<dynamic>)
+          .map((item) => ArchiveData.fromJson(item))
+          .toList(),
       fileLogs: json['file_logs'] != null
           ? List<FileLog>.from(
               json['file_logs'].map((x) => FileLog.fromJson(x)))

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:web1/class/handlingdataview.dart';
 import 'package:web1/constants/icons_svg.dart';
 import 'package:web1/features/home/controller/files_controller.dart';
+import 'package:web1/features/home/data/model/archive_model.dart';
 import 'package:web1/features/home/data/model/files_model.dart';
 import 'package:web1/features/home/view/screens/files_in_group_screen.dart';
 import 'package:web1/features/home/view/widgets/custom_drop_down.dart';
@@ -24,10 +25,7 @@ class _FilePageState extends State<FilePage> {
     return GetBuilder(
         init: controller,
         initState: (state) {
-          print('Loaded Files......................q');
           controller.getFiles();
-          print('Loaded Files......................e');
-          print(controller.filesList.length);
         },
         builder: (controller) {
           return HandlingDataRequest(
@@ -40,9 +38,10 @@ class _FilePageState extends State<FilePage> {
                 child: ListView(
                   children: [
                     SearchTextField(
-                        controller: TextEditingController(),
-                        fileHandler: () {},
-                        groupHandler: () {}),
+                      onChanged: (value) {
+                        controller.search(value);
+                      },
+                    ),
                     const SizedBox(height: 20),
                     AddFileWidget(
                       addFileFunction: () async {
@@ -87,13 +86,13 @@ class FilesTable extends StatelessWidget {
       height: MediaQuery.sizeOf(context).height - 200,
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 0),
       child: DataTable2(
-          empty: const Center(
+          empty: Center(
             child: Text(
               'No Files Found',
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black54),
+                  color: Get.isDarkMode ? Colors.white : Colors.black54),
             ),
           ),
           columnSpacing: 12,
@@ -117,9 +116,9 @@ class FilesTable extends StatelessWidget {
             DataColumn2(
               label: Text('group_name'.tr),
             ),
-            DataColumn2(
-              label: Text('overview'.tr),
-            ),
+            // DataColumn2(
+            //   label: Text('overview'.tr),
+            // ),
             DataColumn2(
               label: Text('last_modified'.tr),
             ),
@@ -180,12 +179,22 @@ class FilesTable extends StatelessWidget {
                           height: 20,
                           color: Colors.blue,
                         ),
-                        title: Text(data[index].fileName),
+                        title: FittedBox(
+                            alignment: AlignmentDirectional.topStart,
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              data[index].fileName.split('.').first,
+                              style: const TextStyle(fontSize: 15),
+                            )),
                       ),
                     ),
                     DataCell(Text(data[index].groupName)),
-                    DataCell(Text(data[index].overView)),
-                    DataCell(Text(data[index].lastEdit)),
+                    // DataCell(FittedBox(
+                    //     fit: BoxFit.scaleDown,
+                    //     child: Text(data[index].overView.split(' ')[0]))),
+                    DataCell(FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(data[index].lastEdit.split(' ')[0]))),
                     DataCell(Text(data[index].state)),
                     DataCell(
                       controller.checkFiles.isNotEmpty
@@ -206,7 +215,15 @@ class FilesTable extends StatelessWidget {
                                   showAction(context, controller, 'logs',
                                       index: index);
                                 } else if (value == 'report') {
-                                  showAction(context, controller, 'report',
+                                  showAction(
+                                    context,
+                                    controller,
+                                    'report',
+                                    index: index,
+                                    fileId: data[index].id,
+                                  );
+                                } else if (value == 'archive') {
+                                  showAction(context, controller, 'archive',
                                       index: index);
                                 }
                               },
@@ -235,6 +252,10 @@ class FilesTable extends StatelessWidget {
                                 PopupMenuItem<String>(
                                   value: 'report',
                                   child: Text('report'.tr),
+                                ),
+                                PopupMenuItem<String>(
+                                  value: 'archive',
+                                  child: Text('archive'.tr),
                                 ),
                               ],
                             ),
@@ -277,16 +298,19 @@ class AddFileWidget extends StatelessWidget {
   }
 }
 
-void showAction(BuildContext context, FilesController controller, String type,
-    {String? fileId, int? index}) {
+showAction(BuildContext context, FilesController controller, String type,
+    {String? fileId, int? index}) async {
   if (type == 'checkin') {
     controller.downloadFiles(id: fileId);
   } else if (type == 'delete') {
     controller.deleteFiles(id: fileId);
   } else if (index != null && type == 'logs') {
     showLogDialog(context, controller.filesList[index].logs);
-  } else if (index != null && type == 'report') {
-    // controller.deleteFiles(id: fileId);
+  } else if (index != null && type == 'report' && fileId != null) {
+    controller.getReport(fileId, groupId: controller.filesList[index].groupId);
+  } else if (type == 'archive' && index != null) {
+    showArchiveDialog(context, controller.filesList[index].archives,
+        groupId: controller.filesList[index].groupId);
   }
 }
 
@@ -388,6 +412,61 @@ void showLogDialog(
                   },
                 ),
         ),
+      );
+    },
+  );
+}
+
+void showArchiveDialog(BuildContext context, List<ArchiveData> archives,
+    {required String groupId}) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('archive'.tr),
+        content: GetBuilder(
+            init: FilesController(),
+            builder: (controller) {
+              return SizedBox(
+                width: 400,
+                height: 300,
+                child: HandlingDataRequest(
+                  statusRequest: controller.statusRequest,
+                  widget: archives.isEmpty
+                      ? const Center(child: Text('No archive'))
+                      : ListView.builder(
+                          itemCount: archives.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Row(
+                                children: [
+                                  Text("${'date'.tr} ${archives[index].date}"),
+                                  const Spacer(),
+                                  IconButton(
+                                      tooltip: 'download'.tr,
+                                      onPressed: () {
+                                        controller.getArchiveFile(
+                                            archives[index].id.toString(),
+                                            groupId: groupId);
+                                      },
+                                      icon: const Icon(Icons.download)),
+                                  IconButton(
+                                      tooltip: 'compare'.tr,
+                                      onPressed: () {
+                                        controller.getCompareFile(
+                                            archives[index].id.toString(),
+                                            groupId: groupId);
+                                      },
+                                      icon: const Icon(Icons.compare)),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              );
+            }),
       );
     },
   );

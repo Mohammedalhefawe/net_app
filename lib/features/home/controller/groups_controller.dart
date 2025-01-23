@@ -9,14 +9,16 @@ import 'package:web1/class/crud.dart';
 import 'package:web1/class/handingdatacontroller.dart';
 import 'package:web1/class/statusrequest.dart';
 import 'package:web1/features/home/data/data_source/files_data.dart';
-import 'package:web1/features/home/data/model/files_group_model.dart';
+import 'package:web1/features/home/data/model/files_model.dart';
 import 'package:web1/features/home/data/model/groups_model.dart';
 import 'package:web1/features/home/view/screens/files_in_group_screen.dart';
 import 'package:web1/features/home/view/widgets/custom_drop_down.dart';
+import 'package:web1/features/home/data/model/files_group_model.dart';
 
 class GroupsController extends GetxController {
   List<ObjectDropdownFormField> groupsList = [];
   List<TableDataModle> filesList = [];
+  List<UserData> users = [];
   bool getFilesCheck = false;
   FilesData filesData = FilesData(Get.find());
   StatusRequest statusRequest = StatusRequest.none;
@@ -30,6 +32,18 @@ class GroupsController extends GetxController {
   onInit() async {
     // getGroups();
     super.onInit();
+  }
+
+  search(String value) async {
+    if (value.isNotEmpty) {
+      filesList = filesList
+          .where((element) =>
+              element.fileName.toLowerCase().contains(value.toLowerCase()))
+          .toList();
+    } else {
+      getFiles();
+    }
+    update();
   }
 
   onSelectGroup(ObjectDropdownFormField? value) {
@@ -56,7 +70,9 @@ class GroupsController extends GetxController {
     if (kIsWeb) {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['txt', 'pdf', 'doc', 'docx'],
+        allowedExtensions: [
+          'txt',
+        ],
       );
       if (result != null && result.files.isNotEmpty) {
         webFile = result.files.first.bytes;
@@ -120,10 +136,15 @@ class GroupsController extends GetxController {
     if (StatusRequest.success == statusRequest) {
       Fluttertoast.showToast(msg: 'deleted file successfully');
       checkFiles.clear();
-      getFiles();
+      Future.delayed(const Duration(seconds: 1), () {
+        getFiles();
+      });
     } else {
       print('error');
-      Fluttertoast.showToast(msg: 'error');
+      Fluttertoast.showToast(
+          msg:
+              'Unauthorized - You must be an admin of the group or the owner of all specified files',
+          timeInSecForIosWeb: 3);
     }
   }
 
@@ -160,26 +181,71 @@ class GroupsController extends GetxController {
     }
   }
 
+  getReport(String id, {required String groupId}) async {
+    final pref = await SharedPreferences.getInstance();
+    final token = pref.getString('auth_token') ?? '';
+    statusRequest = StatusRequest.loading;
+    update();
+    var response =
+        await filesData.getReportData(token, id, 'file', groupId: groupId);
+    ResponseJson responseJson = handlingData(response);
+    statusRequest = responseJson.statusRequest;
+    update();
+    if (StatusRequest.success == statusRequest) {
+      Fluttertoast.showToast(msg: 'sucess');
+    } else {
+      Fluttertoast.showToast(msg: 'error');
+    }
+  }
+
+  getReportUser(String id, {required String groupId}) async {
+    final pref = await SharedPreferences.getInstance();
+    final token = pref.getString('auth_token') ?? '';
+    statusRequest = StatusRequest.loading;
+    update();
+    var response =
+        await filesData.getReportData(token, id, 'user', groupId: groupId);
+    ResponseJson responseJson = handlingData(response);
+    statusRequest = responseJson.statusRequest;
+    update();
+    if (StatusRequest.success == statusRequest) {
+      Get.back();
+      Fluttertoast.showToast(msg: 'sucess');
+    } else {
+      Get.back();
+      Fluttertoast.showToast(
+          timeInSecForIosWeb: 3,
+          msg: 'Unauthorized - You must be an admin of this group');
+    }
+  }
+
   getFiles() async {
+    users.clear();
     filesList.clear();
     final pref = await SharedPreferences.getInstance();
     final token = pref.getString('auth_token') ?? '';
     statusRequest = StatusRequest.loading;
     update();
     var response = await filesData.getFilesInGroupData(token, groupId);
-
     ResponseJson responseJson = handlingData(response);
     statusRequest = responseJson.statusRequest;
-    update();
     if (StatusRequest.success == statusRequest) {
-      print(response);
       print('======================');
+      print(response);
+      print('--------------------');
       getFilesCheck = true;
-      update();
       FilesInGroupModel data = FilesInGroupModel.fromJson(response);
-
+      for (UserData e in data.data.users) {
+        if (users
+            .where(
+                (element) => e.email == element.email && e.name == element.name)
+            .isEmpty) {
+          users.add(e);
+        }
+      }
       for (var element in data.data.files) {
         filesList.add(TableDataModle(
+          archives: element.archives,
           groupId: element.groups[0].id.toString(),
           logs: element.fileLogs,
           fileName: element.name,
@@ -195,6 +261,7 @@ class GroupsController extends GetxController {
       print('error');
       Fluttertoast.showToast(msg: 'error');
     }
+    update();
   }
 
   addFile({String? fileId, String? groupId}) async {
@@ -218,8 +285,10 @@ class GroupsController extends GetxController {
         selectedGroup = null;
         isUploadingImage = false;
         Get.back();
-        getFiles();
         Fluttertoast.showToast(msg: 'success');
+        Future.delayed(const Duration(seconds: 1), () {
+          getFiles();
+        });
       } else {
         print('error');
         Fluttertoast.showToast(msg: 'error');

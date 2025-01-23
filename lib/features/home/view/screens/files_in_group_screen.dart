@@ -9,6 +9,7 @@ import 'package:web1/features/auth/model/user_model.dart';
 import 'package:web1/features/home/controller/file_controller.dart';
 import 'package:web1/features/home/controller/group_controller.dart';
 import 'package:web1/features/home/controller/groups_controller.dart';
+import 'package:web1/features/home/data/model/archive_model.dart';
 import 'package:web1/features/home/data/model/files_model.dart';
 import 'package:web1/features/home/view/screens/files_screen.dart';
 import 'package:web1/features/home/view/widgets/search_text_filed.dart';
@@ -33,8 +34,6 @@ class _FilePageState extends State<FilesGroupPage> {
     groupId = widget.groupId;
     print("Loaded files for Group ID: $groupId");
   }
-
-  final List<String> groupMembers = ["Alice", "Bob", "Charlie", "Diana"];
 
   PlatformFile? selectedFile;
 
@@ -107,7 +106,7 @@ class _FilePageState extends State<FilesGroupPage> {
                     onPressed: () async {
                       if (selectedUser != null) {
                         final GroupController groupController =
-                            Get.find<GroupController>();
+                            Get.put(GroupController());
                         await groupController.addUserToGroup(
                           userId: selectedUser!.id!,
                           groupId: int.parse(widget.groupId),
@@ -158,9 +157,10 @@ class _FilePageState extends State<FilesGroupPage> {
                 child: ListView(
                   children: [
                     SearchTextField(
-                        controller: TextEditingController(),
-                        fileHandler: () {},
-                        groupHandler: () {}),
+                      onChanged: (value) {
+                        controller.search(value);
+                      },
+                    ),
                     const SizedBox(height: 20),
                     AddFileWidget(
                       addFileFunction: () {
@@ -181,26 +181,11 @@ class _FilePageState extends State<FilesGroupPage> {
                         ),
                         Row(
                           children: [
-                            ...groupMembers.take(3).map((member) {
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 0.0),
-                                child: CircleAvatar(
-                                  radius: 15,
-                                  backgroundColor: Colors.blue[200],
-                                  child: Text(
-                                    member[0],
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }),
                             GestureDetector(
                               onTap: () {
-                                _showAllMembers(context, widget.groupId);
+                                showGroupMembersDialog(
+                                    controller.users, controller,
+                                    groupId: controller.groupId);
                               },
                               child: CircleAvatar(
                                 radius: 15,
@@ -253,10 +238,10 @@ class _FilePageState extends State<FilesGroupPage> {
   }
 }
 
-void _showAllMembers(BuildContext context, String groupId) async {
-  final GroupController groupController = Get.find<GroupController>();
-  await groupController.getGroupDetails(groupId: int.parse(groupId));
-}
+// void _showAllMembers(BuildContext context, String groupId) async {
+//   final GroupController groupController = Get.find<GroupController>();
+//   await groupController.getGroupDetails(groupId: int.parse(groupId));
+// }
 
 class TableDataModle {
   final String id;
@@ -267,6 +252,7 @@ class TableDataModle {
   final String lastEdit;
   final String state;
   List<FileLog> logs;
+  List<ArchiveData> archives;
   bool check;
 
   TableDataModle(
@@ -274,6 +260,7 @@ class TableDataModle {
       required this.id,
       required this.groupId,
       this.logs = const [],
+      this.archives = const [],
       this.check = false,
       required this.groupName,
       required this.overView,
@@ -296,13 +283,13 @@ class FilesTable extends StatelessWidget {
       height: MediaQuery.sizeOf(context).height - 200,
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 0),
       child: DataTable2(
-          empty: const Center(
+          empty: Center(
             child: Text(
               'No Files Found',
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black54),
+                  color: Get.isDarkMode ? Colors.white : Colors.black54),
             ),
           ),
           columnSpacing: 12,
@@ -326,9 +313,9 @@ class FilesTable extends StatelessWidget {
             DataColumn2(
               label: Text('group_name'.tr),
             ),
-            DataColumn2(
-              label: Text('overview'.tr),
-            ),
+            // DataColumn2(
+            //   label: Text('overview'.tr),
+            // ),
             DataColumn2(
               label: Text('last_modified'.tr),
             ),
@@ -389,12 +376,22 @@ class FilesTable extends StatelessWidget {
                           height: 20,
                           color: Colors.blue,
                         ),
-                        title: Text(data[index].fileName),
+                        title: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.topStart,
+                            child: Text(
+                              data[index].fileName.split('.').first,
+                              style: const TextStyle(fontSize: 15),
+                            )),
                       ),
                     ),
                     DataCell(Text(data[index].groupName)),
-                    DataCell(Text(data[index].overView)),
-                    DataCell(Text(data[index].lastEdit)),
+                    // DataCell(FittedBox(
+                    //     fit: BoxFit.scaleDown,
+                    //     child: Text(data[index].overView.split(' ')[0]))),
+                    DataCell(FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(data[index].lastEdit.split(' ')[0]))),
                     DataCell(Text(data[index].state)),
                     DataCell(
                       controller.checkFiles.isNotEmpty
@@ -415,7 +412,15 @@ class FilesTable extends StatelessWidget {
                                   showAction(context, controller, 'logs',
                                       index: index);
                                 } else if (value == 'report') {
-                                  showAction(context, controller, 'report',
+                                  showAction(
+                                    context,
+                                    controller,
+                                    'report',
+                                    index: index,
+                                    fileId: data[index].id,
+                                  );
+                                } else if (value == 'archive') {
+                                  showAction(context, controller, 'archive',
                                       index: index);
                                 }
                               },
@@ -445,6 +450,10 @@ class FilesTable extends StatelessWidget {
                                   value: 'report',
                                   child: Text('report'.tr),
                                 ),
+                                PopupMenuItem<String>(
+                                  value: 'archive',
+                                  child: Text('archive'.tr),
+                                ),
                               ],
                             ),
                     ),
@@ -461,8 +470,11 @@ void showAction(BuildContext context, GroupsController controller, String type,
     controller.deleteFiles(id: fileId);
   } else if (index != null && type == 'logs') {
     showLogDialog(context, controller.filesList[index].logs);
-  } else if (index != null && type == 'report') {
-    // controller.deleteFiles(id: fileId);
+  } else if (index != null && type == 'report' && fileId != null) {
+    controller.getReport(fileId, groupId: controller.groupId);
+  } else if (type == 'archive' && index != null) {
+    showArchiveDialog(context, controller.filesList[index].archives,
+        groupId: controller.filesList[index].groupId);
   }
 }
 
@@ -492,5 +504,47 @@ void showLogDialog(
         ),
       );
     },
+  );
+}
+
+void showGroupMembersDialog(List<UserData> users, GroupsController controller,
+    {required String groupId}) {
+  Get.defaultDialog(
+    title: "Group Members",
+    content: SizedBox(
+      width: 400,
+      height: 300,
+      child: ListView(
+        children: users.map((user) {
+          return Row(
+            children: [
+              Expanded(
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.blue[200],
+                    child: Text(user.name[0].toUpperCase()),
+                  ),
+                  title: Text(user.name),
+                  subtitle: Text(user.email),
+                ),
+              ),
+              IconButton(
+                  tooltip: 'download'.tr,
+                  onPressed: () {
+                    controller.getReportUser(user.id.toString(),
+                        groupId: groupId);
+                  },
+                  icon: const Icon(Icons.download)),
+            ],
+          );
+        }).toList(),
+      ),
+    ),
+    confirm: ElevatedButton(
+      onPressed: () {
+        Get.back();
+      },
+      child: const Text("Close"),
+    ),
   );
 }
